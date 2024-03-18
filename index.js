@@ -1,6 +1,6 @@
 import * as THREE from './node_modules/three/src/Three.js'
 import * as ENGINE from './engine/Engine.js'
-import { Closet, LAYOUTS } from './app/Closet.js'
+import { Closet, LAYOUTS, FAMILIES } from './app/Closet.js'
 
 
 //For now, for all layouts, use total height of 200cm i.e 2 units
@@ -24,9 +24,8 @@ window.onload = () =>
     sceneManager.register(input)
     cameraManager.registerInput(input)
 
-    let closet = new Closet({ x: 0, y: 0, z: 0})
-    closet.addColumn('Column1', LAYOUTS.LAYOUT1)
-    closet.addColumn('Column1', LAYOUTS.LAYOUT2)
-    closet.addColumn('Column1', LAYOUTS.LAYOUT3)
+    let closet = new Closet(FAMILIES.FAMILY1)
+    closet.addColumn('Column2', LAYOUTS.LAYOUT1)
+    closet.addColumn('Column3', LAYOUTS.LAYOUT1)
     closet.addToScene(sceneManager)
 }

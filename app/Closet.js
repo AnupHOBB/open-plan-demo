@@ -24,16 +24,26 @@ export const FAMILIES = Object.freeze({
 
 export class Closet
 {
-    constructor(position) 
+    constructor(family) 
     { 
         this.columns = []
-        if (position == undefined || position.x == undefined || position.y == undefined || position.z == undefined)
-            this.position = { x: 0, y: 0, z: 0 }
-        else
-            this.position = position 
+        this.position = { x: 0, y: 0, z: 0 }
+        this.family = family
     }
 
-    addColumn(name, layout) { this.columns.push(new Column(name, layout)) }
+    setPosition(x, y, z)
+    {
+        if (x != undefined && y != undefined && z != undefined)
+            this.position = { x: x, y: y, z: z }
+    }
+
+    addColumn(name, layout) 
+    { 
+        if (this._isLayoutSupported(layout))
+            this.columns.push(new Column(name, layout))
+        else
+            console.log('Layout not supported for '+name)
+    }
 
     addToScene(sceneManager)
     {
@@ -51,7 +61,17 @@ export class Closet
             column.stack(columnPosition)
             columnPosition.x -= WIDTH
         }
-    } 
+    }
+    
+    _isLayoutSupported(inputLayout)
+    {
+        for (let layout of this.family)
+        {
+            if (inputLayout == layout)
+                return true
+        }
+        return false
+    }
 }
 
 class Column
