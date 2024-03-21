@@ -1,6 +1,6 @@
 import * as THREE from './node_modules/three/src/Three.js'
 import * as ENGINE from './engine/Engine.js'
-import { Closet, LAYOUTS, FAMILIES } from './app/Closet.js'
+import { Cabinet, LAYOUTS, FAMILIES } from './app/Configurator.js'
 
 
 //For now, for all layouts, use total height of 200cm i.e 2 units
@@ -10,9 +10,9 @@ window.onload = () =>
     let canvas = document.querySelector('canvas')
     let sceneManager = new ENGINE.SceneManager(canvas, true)
     let cameraManager = new ENGINE.StaticCameraManager('Camera', 15)
-    //cameraManager.setPosition(5, 1.5, -20)
-    cameraManager.setPosition(0, 1.5, -20)
-    cameraManager.setLookAt(0, 1.5, 0)
+    cameraManager.setPosition(5, 1.7, -15)
+    //cameraManager.setPosition(0, 1.5, -20)
+    cameraManager.setLookAt(0, 1.7, 0)
     sceneManager.register(cameraManager)
     sceneManager.setActiveCamera('Camera')
     sceneManager.setSizeInPercent(0.68, 1)
@@ -24,8 +24,8 @@ window.onload = () =>
     sceneManager.register(input)
     cameraManager.registerInput(input)
 
-    let closet = new Closet(FAMILIES.FAMILY1)
-    closet.addColumn('Column2', LAYOUTS.LAYOUT1)
-    closet.addColumn('Column3', LAYOUTS.LAYOUT1)
-    closet.addToScene(sceneManager)
+    let cabinet = new Cabinet(FAMILIES.FAMILY1, sceneManager)
+    cabinet.setWidth(sceneManager, 3)
+    setTimeout(()=>{cabinet.setWidth(sceneManager, 0.8)}, 5000)
+    setTimeout(()=>{cabinet.switchLayout(sceneManager, LAYOUTS.LAYOUT2)}, 10000)
 }
