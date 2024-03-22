@@ -10,24 +10,33 @@ import * as ENGINE from '../engine/Engine.js'
 const MIN_WIDTH = 0.4
 const MAX_WIDTH = 3.5
 const MAX_COLUMN_WIDTH = 0.76
+const MAX_TWO_PART_COLUMN_HEIGHT = 2.6
+const MIN_TWO_PART_COLUMN_HEIGHT = 2
+const MAX_ONE_PART_COLUMN_HEIGHT = 2.2
+const MIN_ONE_PART_COLUMN_HEIGHT = 0.8
 const DEPTH = 0.4
 
 const COMPONENTS = Object.freeze({
     BOTTOM_DRAWER : {type: 'BottomDrawer', height: 0.3, color: 0xFF0000},
     TOP_DRAWER : {type: 'TopDrawer', height: 0.1, color: 0x00FF00},
     BOTTOM_CABINET : {type: 'BottomCabinet', height: 0.8, color: 0x0000FF},
-    UPPER_GLASS_CABINET : {type: 'UpperGlassCabinet', height: 2.4, color: 0xFFFFFF}
+    UPPER_GLASS_CABINET : {type: 'UpperGlassCabinet', height: 1.8, color: 0xFFFFFF}
 })
 
+//part is gonna be either 1 or 2 
 export const LAYOUTS = Object.freeze({
-    LAYOUT1: [COMPONENTS.BOTTOM_CABINET, COMPONENTS.BOTTOM_DRAWER, COMPONENTS.UPPER_GLASS_CABINET],
-    LAYOUT2: [COMPONENTS.BOTTOM_DRAWER, COMPONENTS.TOP_DRAWER], 
-    LAYOUT3: [COMPONENTS.BOTTOM_CABINET, COMPONENTS.UPPER_GLASS_CABINET] 
+    LAYOUT1: {part: 2, bottom : [COMPONENTS.BOTTOM_CABINET], top : [COMPONENTS.UPPER_GLASS_CABINET],
+        getBottomHeight : function(columnHeight) { return (columnHeight > 2.2) ? 0.9 : 0.8 }
+    },
+    LAYOUT2: {part: 2, bottom : [COMPONENTS.BOTTOM_DRAWER], top : [COMPONENTS.TOP_DRAWER], getBottomHeight : function() { return 0.3 }}, 
+    LAYOUT3: {part: 1, bottom : [COMPONENTS.BOTTOM_CABINET], top : [COMPONENTS.UPPER_GLASS_CABINET], getBottomHeight : function() { return 0.8 }},
+    LAYOUT4: {part: 1, bottom : [], top : [COMPONENTS.UPPER_GLASS_CABINET], getBottomHeight : function() { return 0 } } 
 })
 
 export const FAMILIES = Object.freeze({
     FAMILY1: [LAYOUTS.LAYOUT1, LAYOUTS.LAYOUT2],
-    FAMILY2: [LAYOUTS.LAYOUT2, LAYOUTS.LAYOUT3]
+    FAMILY2: [LAYOUTS.LAYOUT2, LAYOUTS.LAYOUT3],
+    FAMILY3: [LAYOUTS.LAYOUT1, LAYOUTS.LAYOUT4],
 })
 
 export class Cabinet
@@ -76,6 +85,16 @@ export class Cabinet
         } 
     }
 
+    /**
+     * Set the height of the cabinet
+     * @param {Number} height height of the cabinet in meters 
+     */
+    setHeight(height)
+    {
+        for (let column of this.columns)
+            column.setHeight(height)
+    }
+
     switchLayout(sceneManager, layout)
     {  
         if (this._isLayoutSupported(layout))
@@ -91,14 +110,11 @@ export class Cabinet
             }
             this.addToScene(sceneManager)
         }
-        else
-            console.log('Layout not supported')
     }
 
     addToScene(sceneManager)
     {
         this._prepareColumns()
-        let i = 0
         for (let column of this.columns)   
             column.addToScene(sceneManager)
     }
@@ -131,10 +147,15 @@ class Column
     constructor(name, layout, width) 
     {
         this.name = name 
-        this.components = []
+        this.bottomComponents = []
+        this.topComponents = []
         this.isAddedToScene = false
         this.layout = layout
         this.width = width
+        this.height = this._calculateHeight(layout)
+        this.bottomHeight = this.layout.getBottomHeight(this.height)
+        this.topHeight = this.height - this.bottomHeight
+        this.position = {x:0, y:0, z:0}
         this._prepareComponents(layout)
     }
 
@@ -143,8 +164,31 @@ class Column
         if (width <= MAX_COLUMN_WIDTH)
         {    
             this.width = width
-            for (let component of this.components)
+            for (let component of this.bottomComponents)
                 component.setWidth(width)
+            for (let component of this.topComponents)
+                component.setWidth(width)
+        }
+    }
+
+    setHeight(height)
+    {
+        if (this._isHeightValid(height))
+        {
+            let newBottomHeight = this.layout.getBottomHeight(height)
+            let deltaBottomHeight = newBottomHeight - this.bottomHeight
+            let deltaBottomHeightPerComponent = deltaBottomHeight/this.bottomComponents.length
+            this.bottomHeight = newBottomHeight
+            for (let component of this.bottomComponents)
+                component.setHeight(component.height + deltaBottomHeightPerComponent)
+            let newTopHeight = height - newBottomHeight
+            let deltaTopHeight = newTopHeight - this.topHeight
+            let deltaTopHeightPerComponent = deltaTopHeight/this.topComponents.length
+            this.topHeight = newTopHeight
+            for (let component of this.topComponents)
+                component.setHeight(component.height + deltaTopHeightPerComponent)
+            this.height = this.bottomHeight + this.topHeight    
+            this.stack(this.position)
         }
     }
 
@@ -155,22 +199,29 @@ class Column
         if (position != undefined && position.x != undefined && position.y != undefined && position.z != undefined)
         {
             let componentPosition = { x: position.x, y: position.y, z: position.z }
-            for (let component of this.components)
+            for (let component of this.bottomComponents)
             {
                 componentPosition.y += component.height/2.0
                 component.setPosition(componentPosition.x, componentPosition.y, componentPosition.z)
                 componentPosition.y += component.height/2.0
             }
+            for (let component of this.topComponents)
+            {
+                componentPosition.y += component.height/2.0
+                component.setPosition(componentPosition.x, componentPosition.y, componentPosition.z)
+                componentPosition.y += component.height/2.0
+            }
+            this.position = { x: position.x, y: position.y, z: position.z }
         }
     }
-
-    getComponentAt(index) { return this.components.length > index ? this.components[index] : null }
 
     addToScene(sceneManager) 
     { 
         if (!this.isAddedToScene)
         {
-            for (let component of this.components)
+            for (let component of this.bottomComponents)
+                component.registerInScene(sceneManager)
+            for (let component of this.topComponents)
                 component.registerInScene(sceneManager)
             this.isAddedToScene = true
         }
@@ -180,7 +231,9 @@ class Column
     {
         if (this.isAddedToScene)
         {
-            for (let component of this.components)
+            for (let component of this.bottomComponents)
+                component.unregisterFromScene(sceneManager)
+            for (let component of this.topComponents)
                 component.unregisterFromScene(sceneManager)
             this.isAddedToScene = false
         }
@@ -188,8 +241,30 @@ class Column
 
     _prepareComponents(layout)
     {
-        for (let componentType of layout)
-            this.components.push(new Component(this.name+componentType.type, componentType.type, this.width, componentType.height, componentType.color))
+        let bottomComponents = layout.bottom
+        for (let componentType of bottomComponents)
+            this.bottomComponents.push(new Component(this.name+componentType.type, componentType.type, this.width, componentType.height, componentType.color))
+        let topComponents = layout.top
+        for (let componentType of topComponents)
+            this.topComponents.push(new Component(this.name+componentType.type, componentType.type, this.width, componentType.height, componentType.color))
+    }
+
+    _isHeightValid(height)
+    {
+        return (this.layout.part == 1 && height >= MIN_ONE_PART_COLUMN_HEIGHT && height <= MAX_ONE_PART_COLUMN_HEIGHT) || 
+        (this.layout.part == 2 && height >= MIN_TWO_PART_COLUMN_HEIGHT && height <= MAX_TWO_PART_COLUMN_HEIGHT)
+    }
+
+    _calculateHeight(layout)
+    {
+        let height = 0
+        let bottomComponents = layout.bottom
+        for (let componentType of bottomComponents)
+            height += componentType.height
+        let topComponents = layout.top
+        for (let componentType of topComponents)
+            height += componentType.height
+        return height
     }
 }
 
@@ -198,12 +273,23 @@ class Component
     constructor(name, type, width, height, color)
     {
         this.type = type
+        this.width = width
         this.height = height
         this.box = new THREE.BoxGeometry(width, height, DEPTH)
         this.model = new ENGINE.StaticModel(name, this.box, new THREE.MeshLambertMaterial({color: color, transparent: true, opacity: 0.5}), false, false)
     }
 
-    setWidth(width) { this.model.mesh.geometry = new THREE.BoxGeometry(width, this.height, DEPTH) }
+    setWidth(width) 
+    { 
+        this.width = width
+        this.model.mesh.geometry = new THREE.BoxGeometry(width, this.height, DEPTH) 
+    }
+
+    setHeight(height) 
+    {
+        this.height = height
+        this.model.mesh.geometry = new THREE.BoxGeometry(this.width, height, DEPTH) 
+    }
 
     setPosition(x, y, z) { this.model.setPosition(x, y, z) }
 
