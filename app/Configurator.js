@@ -25,12 +25,12 @@ const COMPONENTS = Object.freeze({
 
 //part is gonna be either 1 or 2 
 export const LAYOUTS = Object.freeze({
-    LAYOUT1: {part: 2, bottom : [COMPONENTS.BOTTOM_CABINET], top : [COMPONENTS.UPPER_GLASS_CABINET],
+    LAYOUT1: {type: '1', part: 2, bottom : [COMPONENTS.BOTTOM_CABINET], top : [COMPONENTS.UPPER_GLASS_CABINET],
         getBottomHeight : function(columnHeight) { return (columnHeight > 2.2) ? 0.9 : 0.8 }
     },
-    LAYOUT2: {part: 2, bottom : [COMPONENTS.BOTTOM_DRAWER], top : [COMPONENTS.TOP_DRAWER], getBottomHeight : function() { return 0.3 }}, 
-    LAYOUT3: {part: 1, bottom : [COMPONENTS.BOTTOM_CABINET], top : [COMPONENTS.UPPER_GLASS_CABINET], getBottomHeight : function() { return 0.8 }},
-    LAYOUT4: {part: 1, bottom : [], top : [COMPONENTS.UPPER_GLASS_CABINET], getBottomHeight : function() { return 0 } } 
+    LAYOUT2: {type: '2', part: 2, bottom : [COMPONENTS.BOTTOM_DRAWER], top : [COMPONENTS.TOP_DRAWER], getBottomHeight : function() { return 0.3 }}, 
+    LAYOUT3: {type: '3', part: 1, bottom : [COMPONENTS.BOTTOM_CABINET], top : [COMPONENTS.UPPER_GLASS_CABINET], getBottomHeight : function() { return 0.8 }},
+    LAYOUT4: {type: '4', part: 1, bottom : [], top : [COMPONENTS.UPPER_GLASS_CABINET], getBottomHeight : function() { return 0 } } 
 })
 
 export const FAMILIES = Object.freeze({
@@ -47,7 +47,8 @@ export class Cabinet
         this.position = { x: 0, y: 0, z: 0 }
         this.family = family
         this.activeLayout = family[0]
-        this.setWidth(sceneManager, MIN_WIDTH)
+        this.sceneManager = sceneManager
+        this.setWidth(MIN_WIDTH)
     }
 
     setPosition(x, y, z)
@@ -60,7 +61,7 @@ export class Cabinet
      * Set the width of the cabinet
      * @param {Number} width width of the cabinet in meters 
      */
-    setWidth(sceneManager, width)
+    setWidth(width)
     {
         if (width >= MIN_WIDTH && width <= MAX_WIDTH)
         {   
@@ -69,7 +70,7 @@ export class Cabinet
             if (columnCount < this.columns.length)
             {    
                 for (let i=columnCount; i<this.columns.length; i++)
-                    this.columns[i].removeFromScene(sceneManager)
+                    this.columns[i].removeFromScene(this.sceneManager)
                 this.columns.splice(columnCount, this.columns.length - columnCount)
             }
             else if (columnCount > this.columns.length)
@@ -81,7 +82,7 @@ export class Cabinet
             for (let column of this.columns)
                 column.setWidth(columnWidth)
             this.width = width
-            this.addToScene(sceneManager)
+            this.addToScene()
         } 
     }
 
@@ -95,28 +96,34 @@ export class Cabinet
             column.setHeight(height)
     }
 
-    switchLayout(sceneManager, layout)
+    switchLayout(layout)
     {  
         if (this._isLayoutSupported(layout))
         {    
             this.activeLayout = layout
             for (let column of this.columns)    
-                column.removeFromScene(sceneManager)
+                column.removeFromScene(this.sceneManager)
             let columnWidth = this.width/this.columns.length
             for (let i=0; i<this.columns.length; i++)
             {    
                 let name = this.columns[i].name
                 this.columns.splice(i, 1, new Column(name, this.activeLayout, columnWidth))
             }
-            this.addToScene(sceneManager)
+            this.addToScene()
         }
     }
 
-    addToScene(sceneManager)
+    addToScene()
     {
         this._prepareColumns()
         for (let column of this.columns)   
-            column.addToScene(sceneManager)
+            column.addToScene(this.sceneManager)
+    }
+
+    removeFromScene()
+    {
+        for (let column of this.columns)   
+            column.removeFromScene(this.sceneManager)
     }
 
     _prepareColumns()

@@ -30,6 +30,7 @@ div.side-bar-item
     display: block;
     width: 90%;
     margin-left: 5%;
+    margin-top: 5vh;
 }
 
 p.side-bar-item-title
@@ -84,4 +85,19 @@ p.side-bar-item-title
     border-width: 0.25ch;
     border-style: solid;
     border-color: rgb(0, 0, 0);
+}
+
+div.radio-container
+{
+    display: flex;
+    gap: 1vw;
+    padding-top: 2vh;
+    padding-left: 2vh;
+}
+
+label.radio-text
+{
+    height: 1%;
+    font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+    font-size: 2.5vh;
 }
