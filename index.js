@@ -1,8 +1,7 @@
 import * as THREE from './node_modules/three/src/Three.js'
 import * as ENGINE from './engine/Engine.js'
-import { Cabinet, LAYOUTS, FAMILIES } from './app/Configurator.js'
+import { Cabinet, FAMILIES } from './app/Configurator.js'
 
-const FAMILY_LAYOUTS = []
 const LAYOUT_INDEX = 6 
 
 window.onload = () => 
@@ -22,59 +21,57 @@ window.onload = () =>
     let input = new ENGINE.InputManager('Input')
     sceneManager.register(input)
     cameraManager.registerInput(input)
-
     let family = FAMILIES.FAMILY1
     let cabinet = new Cabinet(family, sceneManager)
     cabinet.setWidth(2)
 
     function initializeFamilyRadioButtons()
     {   
-        for (let FAMILY in FAMILIES)
-            FAMILY_LAYOUTS.push(createLayoutRadioButtons(FAMILIES[FAMILY]))
-
         let sideBar = document.getElementById('side-bar')
         let radioButtonFamily1 = document.getElementById('radio-family1')
         radioButtonFamily1.addEventListener('change', e=>{
             let oldLayoutButtons = sideBar.children[LAYOUT_INDEX]
-            sideBar.replaceChild(FAMILY_LAYOUTS[0], oldLayoutButtons)
-
+            let newLayoutButtons = createLayoutRadioButtons(FAMILIES.FAMILY1)
+            sideBar.replaceChild(newLayoutButtons, oldLayoutButtons)
             cabinet.removeFromScene()
             cabinet = new Cabinet(FAMILIES.FAMILY1, sceneManager)
             cabinet.setWidth(2)
-
             radioButtonFamily1.checked = true
             radioButtonFamily2.checked = false
             radioButtonFamily3.checked = false
+            emptyTextFields()
         })
+
         let radioButtonFamily2 = document.getElementById('radio-family2')
         radioButtonFamily2.addEventListener('change', e=>{
             let oldLayoutButtons = sideBar.children[LAYOUT_INDEX]
-            sideBar.replaceChild(FAMILY_LAYOUTS[1], oldLayoutButtons)
-            
+            let newLayoutButtons = createLayoutRadioButtons(FAMILIES.FAMILY2)
+            sideBar.replaceChild(newLayoutButtons, oldLayoutButtons)
             cabinet.removeFromScene()
             cabinet = new Cabinet(FAMILIES.FAMILY2, sceneManager)
             cabinet.setWidth(2)
-
             radioButtonFamily1.checked = false
             radioButtonFamily2.checked = true
             radioButtonFamily3.checked = false
+            emptyTextFields()
         })
+
         let radioButtonFamily3 = document.getElementById('radio-family3')
         radioButtonFamily3.addEventListener('change', e=>{
             let oldLayoutButtons = sideBar.children[LAYOUT_INDEX]
-            sideBar.replaceChild(FAMILY_LAYOUTS[2], oldLayoutButtons)
-            
+            let newLayoutButtons = createLayoutRadioButtons(FAMILIES.FAMILY3)
+            sideBar.replaceChild(newLayoutButtons, oldLayoutButtons)
             cabinet.removeFromScene()
             cabinet = new Cabinet(FAMILIES.FAMILY3, sceneManager)
             cabinet.setWidth(2)
-
             radioButtonFamily1.checked = false
             radioButtonFamily2.checked = false
             radioButtonFamily3.checked = true
+            emptyTextFields()
         })
-
         let oldLayoutButtons = sideBar.children[LAYOUT_INDEX]
-        sideBar.replaceChild(FAMILY_LAYOUTS[0], oldLayoutButtons)
+        let newLayoutButtons = createLayoutRadioButtons(FAMILIES.FAMILY1)
+        sideBar.replaceChild(newLayoutButtons, oldLayoutButtons)
     }
 
     function initializeSubmit()
@@ -124,6 +121,14 @@ window.onload = () =>
             radioContainer.appendChild(radioItemContainer)
         }
         return radioContainer
+    }
+
+    function emptyTextFields()
+    {
+        let widthField = document.getElementById('width')
+        widthField.value = ''
+        let heightField = document.getElementById('height')
+        heightField.value = ''
     }
 
     initializeFamilyRadioButtons()
