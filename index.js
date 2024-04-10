@@ -46,8 +46,8 @@ window.onload = () =>
         //cameraManager.setMovementSensitivity(0.5) 
     })*/
 
-    const ENVMAP_TEXTURES = ['../assets/cubemap/right.jpg','../assets/cubemap/left.jpg','../assets/cubemap/top.jpg','../assets/cubemap/bottom.jpg','../assets/cubemap/front.jpg','../assets/cubemap/back.jpg']
-    const WOOD_TEXTURE = ['../assets/wood_03.webp']
+    const ENVMAP_TEXTURES = ['./assets/cubemap/right.jpg','./assets/cubemap/left.jpg','./assets/cubemap/top.jpg','./assets/cubemap/bottom.jpg','./assets/cubemap/front.jpg','./assets/cubemap/back.jpg']
+    const WOOD_TEXTURE = ['./assets/wood_03.webp']
     let loader = new ENGINE.AssetLoader()
     loader.addLoader(CUBEMAP, ENVMAP_TEXTURES, new THREE.CubeTextureLoader())
     loader.addLoader(WOOD, WOOD_TEXTURE, new THREE.TextureLoader())
