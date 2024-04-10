@@ -62,9 +62,11 @@ export class OrbitalCameraManager extends CameraManager
 
     /**
      * Sets the position where the camera should look
-     * @param {THREE.Vector3} lookAt the position where the camera should look
+     * @param {Number} x x-coordinate in world space
+     * @param {Number} y y-coordinate in world space
+     * @param {Number} z z-coordinate in world space 
      */
-    setLookAt(lookAt) { this.core.setLookAt(lookAt) }
+    setLookAt(x, y, z) { this.core.setLookAt(x, y, z)  }
 
     /**
      * Sets the sensitivity of the camera pan movement
@@ -153,14 +155,16 @@ class OrbitalCameraManagerCore extends PerspectiveCamera
 
     /**
      * Sets the position where the camera should look
-     * @param {THREE.Vector3} lookAt the position where the camera should look
+     * @param {Number} x x-coordinate in world space
+     * @param {Number} y y-coordinate in world space
+     * @param {Number} z z-coordinate in world space 
      */
-    setLookAt(lookAt) 
+    setLookAt(x, y, z) 
     { 
-        this.lookAt = lookAt
+        this.lookAt = new THREE.Vector3(x, y, z)
         this.cameraOrbiterYaw.setCenter(this.lookAt)
         this.cameraOrbiterPitch.setCenter(this.lookAt)
-        this.camera.lookAt(lookAt)
+        this.camera.lookAt(x, y, z)
     }
 
     /**

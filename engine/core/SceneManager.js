@@ -9,12 +9,19 @@ export class SceneObject
 {
     /**
      * @param {String} name name of the object which is used in sending or receiving message
-     * @param {THREE.Object3D} scene threejs object3D instance
+     * @param {THREE.Object3D} model threejs object3D instance
      */
-    constructor(name, scene) 
+    constructor(name, model) 
     { 
         this.name = name
-        this.scene = (scene != undefined && scene.isObject3D != undefined && scene.isObject3D) ? scene : new THREE.Group()
+        this.scene = new THREE.Group()
+        if (model != undefined)
+        {
+            if (model.isObject3D)
+                this.scene = model
+            else if (model.scene.isObject3D)
+                this.scene = model.scene
+        }
         this.children = []
         this.drawables = [{object: this.scene, isRayCastable: false}]
     }
@@ -39,9 +46,9 @@ export class SceneObject
 
     /**
      * Sets the rotation of the mesh in world space using euler values
-     * @param {Number} x pitch in world space
-     * @param {Number} y yaw in world space
-     * @param {Number} z roll in world space 
+     * @param {Number} x pitch in world space in radians
+     * @param {Number} y yaw in world space in radians
+     * @param {Number} z roll in world space in radians 
      */
     setRotation(x, y, z) { this.scene.rotation.set(x, y, z) }
     

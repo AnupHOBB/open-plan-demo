@@ -97,8 +97,9 @@ export class MeshModel extends SceneObject
      */
     constructor(name, model, cullBackFace)
     {
-        super(name, model.scene.clone())
+        super(name, model)
         this.meshMap = new Map()
+        this.boneMap = new Map()
         Misc.postOrderTraversal(this.scene, mesh => {
             this.meshMap.set(mesh.name, mesh)
             if (mesh.material != undefined)
@@ -114,6 +115,10 @@ export class MeshModel extends SceneObject
                 else
                     mesh.material.transparent = true
             }
+        })
+        Misc.postOrderTraversal(this.scene, mesh => {
+            if (mesh != undefined && mesh.isBone)
+                this.boneMap.set(mesh.name, mesh)
         })
         if (model.animations != undefined && model.animations.length != undefined && model.animations.length > 0)
         {
@@ -187,7 +192,19 @@ export class MeshModel extends SceneObject
 
     }
 
+    /**
+     * Returns the mesh with the given name
+     * @param {String} meshName name of the required mesh
+     * @returns {THREE.Object3D} mesh with the given name
+     */
     getMesh(meshName) { return this.meshMap.get(meshName) }
+
+    /**
+     * Returns the bone with the given name
+     * @param {String} boneName name of the required mesh
+     * @returns {THREE.Object3D} bone with the given name
+     */
+    getBone(boneName) { return this.boneMap.get(boneName) }
 
     /**
      * 

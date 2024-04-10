@@ -1,10 +1,60 @@
 import * as THREE from './node_modules/three/src/Three.js'
 import * as ENGINE from './engine/Engine.js'
-import { Cabinet, FAMILIES } from './app/Configurator.js'
+import { Cabinet, FAMILIES, CUBEMAP, WOOD } from './app/Configurator.js'
+import {GLTFLoader} from './node_modules/three/examples/jsm/loaders/GLTFLoader.js'
+import {DRACOLoader} from './node_modules/three/examples/jsm/loaders/DRACOLoader.js'
 
+const CABINET = 'assets/openplan_90cm_Test01.glb'
 const LAYOUT_INDEX = 6 
 
 window.onload = () => 
+{
+    /*let loader = new ENGINE.AssetLoader()
+    let dracoLoader = new DRACOLoader()
+    dracoLoader.setDecoderPath(ENGINE.DRACO_DECODER_PATH)
+    let modelLoader = new GLTFLoader()
+    modelLoader.setDRACOLoader(dracoLoader)
+    loader.addLoader(CABINET, CABINET, modelLoader)
+    loader.execute(p=>{}, assetMap=>{
+        let canvas = document.querySelector('canvas')
+        let sceneManager = new ENGINE.SceneManager(canvas, true)
+        let input = new ENGINE.InputManager('Input')
+        sceneManager.register(input)
+        let cameraManager = new ENGINE.StaticCameraManager('Camera', 15)
+        //let cameraManager = new ENGINE.FirstPersonCameraManager('Camera', 15)
+        cameraManager.setPosition(0, 1.3, -10)
+        cameraManager.setLookAt(0, 1.3, 0)
+        cameraManager.registerInput(input)
+        sceneManager.register(cameraManager)
+        sceneManager.setActiveCamera('Camera')
+        sceneManager.setSizeInPercent(0.68, 1)
+        sceneManager.setBackground(new THREE.Color(0, 0, 0))
+        let directLight = new ENGINE.DirectLight('DirectLight', new THREE.Color(1, 1, 1), 0.5)
+        directLight.setPosition(5, 20, -10)
+        sceneManager.register(directLight)
+
+        let cabinetModel = new ENGINE.MeshModel('Cabinet', assetMap.get(CABINET), true)
+        sceneManager.register(cabinetModel)
+        let offset = 0.1
+        let boneLeft = cabinetModel.getBone('BoneLeft')
+        boneLeft.position.y += offset
+        let boneRight = cabinetModel.getBone('BoneRight')
+        boneRight.position.y += offset
+        let boneCenter = cabinetModel.getBone('neutral_bone_1')
+        boneCenter.position.y += offset
+        //input.setCursorSensitivity(0.01)
+        //cameraManager.setMovementSensitivity(0.5) 
+    })*/
+
+    const ENVMAP_TEXTURES = ['../assets/cubemap/right.jpg','../assets/cubemap/left.jpg','../assets/cubemap/top.jpg','../assets/cubemap/bottom.jpg','../assets/cubemap/front.jpg','../assets/cubemap/back.jpg']
+    const WOOD_TEXTURE = ['../assets/wood_03.webp']
+    let loader = new ENGINE.AssetLoader()
+    loader.addLoader(CUBEMAP, ENVMAP_TEXTURES, new THREE.CubeTextureLoader())
+    loader.addLoader(WOOD, WOOD_TEXTURE, new THREE.TextureLoader())
+    loader.execute(p=>{}, assets => setupBoxCabinetScene(assets))
+}
+
+function setupBoxCabinetScene(assets)
 {
     let canvas = document.querySelector('canvas')
     let sceneManager = new ENGINE.SceneManager(canvas, true)
@@ -14,15 +64,13 @@ window.onload = () =>
     sceneManager.register(cameraManager)
     sceneManager.setActiveCamera('Camera')
     sceneManager.setSizeInPercent(0.68, 1)
-    sceneManager.setBackground(new THREE.Color(0, 0, 0))
-    let directLight = new ENGINE.DirectLight('DirectLight', new THREE.Color(1, 1, 1), 0.5)
+    sceneManager.setBackground(assets.get(CUBEMAP))
+    let directLight = new ENGINE.PointLight('DirectLight', new THREE.Color(1, 1, 1), 1)//, 70)
     directLight.setPosition(5, 20, -10)
     sceneManager.register(directLight)
-    let input = new ENGINE.InputManager('Input')
-    sceneManager.register(input)
-    cameraManager.registerInput(input)
+
     let family = FAMILIES.FAMILY1
-    let cabinet = new Cabinet(family, sceneManager)
+    let cabinet = new Cabinet(family, sceneManager, assets)
     cabinet.setWidth(2)
 
     function initializeFamilyRadioButtons()
@@ -34,7 +82,7 @@ window.onload = () =>
             let newLayoutButtons = createLayoutRadioButtons(FAMILIES.FAMILY1)
             sideBar.replaceChild(newLayoutButtons, oldLayoutButtons)
             cabinet.removeFromScene()
-            cabinet = new Cabinet(FAMILIES.FAMILY1, sceneManager)
+            cabinet = new Cabinet(FAMILIES.FAMILY1, sceneManager, assets)
             cabinet.setWidth(2)
             radioButtonFamily1.checked = true
             radioButtonFamily2.checked = false
@@ -48,7 +96,7 @@ window.onload = () =>
             let newLayoutButtons = createLayoutRadioButtons(FAMILIES.FAMILY2)
             sideBar.replaceChild(newLayoutButtons, oldLayoutButtons)
             cabinet.removeFromScene()
-            cabinet = new Cabinet(FAMILIES.FAMILY2, sceneManager)
+            cabinet = new Cabinet(FAMILIES.FAMILY2, sceneManager, assets)
             cabinet.setWidth(2)
             radioButtonFamily1.checked = false
             radioButtonFamily2.checked = true
@@ -62,7 +110,7 @@ window.onload = () =>
             let newLayoutButtons = createLayoutRadioButtons(FAMILIES.FAMILY3)
             sideBar.replaceChild(newLayoutButtons, oldLayoutButtons)
             cabinet.removeFromScene()
-            cabinet = new Cabinet(FAMILIES.FAMILY3, sceneManager)
+            cabinet = new Cabinet(FAMILIES.FAMILY3, sceneManager, assets)
             cabinet.setWidth(2)
             radioButtonFamily1.checked = false
             radioButtonFamily2.checked = false

@@ -18,7 +18,11 @@ export class AssetLoader
      * @param {Function} onProgress callback that is called while the assets are loading
      * @param {Function} onComplete callback that is called after all assets are loaded
      */
-    execute(onProgress, onComplete) { this.core.load(0, onProgress, onComplete) }
+    execute(onProgress, onComplete) 
+    {
+        this.core.assetMap.clear() 
+        this.core.load(0, onProgress, onComplete) 
+    }
 }
 
 /**
@@ -56,7 +60,6 @@ class AssetLoaderCore
         if (index >= this.urls.length)
         {    
             onComplete(this.assetMap)
-            this.assetMap.clear()
             this.loaderMap.clear()
             this.urls.splice(0, this.urls.length)
         }

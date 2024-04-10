@@ -1,5 +1,6 @@
 import * as THREE from '../node_modules/three/src/Three.js'
 import * as ENGINE from '../engine/Engine.js'
+//import { BoxGeometry } from '../node_modules/three/src/geometries/BoxGeometry.js'
 
 /**
  * Minimum width of a column is 40cm and maximum is 76cm.
@@ -16,11 +17,20 @@ const MAX_ONE_PART_COLUMN_HEIGHT = 2.2
 const MIN_ONE_PART_COLUMN_HEIGHT = 0.8
 const DEPTH = 0.4
 
+export const CUBEMAP = 'cubemap'
+export const WOOD = 'wood'
+
+const MATERIALS = Object.freeze({
+    WOOD : 'wood',
+    GLASS : 'glass',
+    METAL : 'metal'
+})
+
 const COMPONENTS = Object.freeze({
-    BOTTOM_DRAWER : {type: 'BottomDrawer', height: 0.3, color: 0xFF0000},
-    TOP_DRAWER : {type: 'TopDrawer', height: 0.1, color: 0x00FF00},
-    BOTTOM_CABINET : {type: 'BottomCabinet', height: 0.8, color: 0x0000FF},
-    UPPER_GLASS_CABINET : {type: 'UpperGlassCabinet', height: 1.8, color: 0xFFFFFF}
+    BOTTOM_DRAWER : {materialType: MATERIALS.WOOD, type: 'BottomDrawer', height: 0.3, color: 0xFF0000},
+    TOP_DRAWER : {materialType: MATERIALS.WOOD, type: 'TopDrawer', height: 0.1, color: 0x00FF00},
+    BOTTOM_CABINET : {materialType: MATERIALS.METAL, type: 'BottomCabinet', height: 0.8, color: 0x0000FF},
+    UPPER_GLASS_CABINET : {materialType: MATERIALS.GLASS, type: 'UpperGlassCabinet', height: 1.8, color: 0xFFFFFF}
 })
 
 //part is gonna be either 1 or 2 
@@ -41,13 +51,14 @@ export const FAMILIES = Object.freeze({
 
 export class Cabinet
 {
-    constructor(family, sceneManager) 
+    constructor(family, sceneManager, assetMap) 
     { 
         this.columns = []
         this.position = { x: 0, y: 0, z: 0 }
         this.family = family
         this.activeLayout = family[0]
         this.sceneManager = sceneManager
+        this.assetMap = assetMap
         this.setWidth(MIN_WIDTH)
     }
 
@@ -77,7 +88,7 @@ export class Cabinet
             {
                 let extraColumns = columnCount - this.columns.length
                 for (let i=0; i<extraColumns; i++)
-                    this.columns.push(new Column('Column'+this.columns.length, this.activeLayout, width))
+                    this.columns.push(new Column('Column'+this.columns.length, this.activeLayout, width, this.assetMap))
             }
             for (let column of this.columns)
                 column.setWidth(columnWidth)
@@ -107,7 +118,7 @@ export class Cabinet
             for (let i=0; i<this.columns.length; i++)
             {    
                 let name = this.columns[i].name
-                this.columns.splice(i, 1, new Column(name, this.activeLayout, columnWidth))
+                this.columns.splice(i, 1, new Column(name, this.activeLayout, columnWidth, this.assetMap))
             }
             this.addToScene()
         }
@@ -151,7 +162,7 @@ export class Cabinet
 
 class Column
 {
-    constructor(name, layout, width) 
+    constructor(name, layout, width, assetMap) 
     {
         this.name = name 
         this.bottomComponents = []
@@ -163,6 +174,7 @@ class Column
         this.bottomHeight = this.layout.getBottomHeight(this.height)
         this.topHeight = this.height - this.bottomHeight
         this.position = {x:0, y:0, z:0}
+        this.assetMap = assetMap
         this._prepareComponents(layout)
     }
 
@@ -250,10 +262,10 @@ class Column
     {
         let bottomComponents = layout.bottom
         for (let componentType of bottomComponents)
-            this.bottomComponents.push(new Component(this.name+componentType.type, componentType.type, this.width, componentType.height, componentType.color))
+            this.bottomComponents.push(new Component(this.name+componentType.type, this.width, componentType, this.assetMap))
         let topComponents = layout.top
         for (let componentType of topComponents)
-            this.topComponents.push(new Component(this.name+componentType.type, componentType.type, this.width, componentType.height, componentType.color))
+            this.topComponents.push(new Component(this.name+componentType.type, this.width, componentType, this.assetMap))
     }
 
     _isHeightValid(height)
@@ -277,13 +289,16 @@ class Column
 
 class Component
 {
-    constructor(name, type, width, height, color)
+    constructor(name, width, componentType, assetMap)
     {
-        this.type = type
+        this.type = componentType.type
         this.width = width
-        this.height = height
-        this.box = new THREE.BoxGeometry(width, height, DEPTH)
-        this.model = new ENGINE.StaticModel(name, this.box, new THREE.MeshLambertMaterial({color: color, transparent: true, opacity: 0.5}), false, false)
+        this.height = componentType.height
+        this.assetMap = assetMap
+
+        let material = this._createMaterial(componentType)
+        console.log(material)
+        this.model = new ENGINE.StaticModel(name, new THREE.BoxGeometry(width, this.height, DEPTH), material, false, false)
     }
 
     setWidth(width) 
@@ -324,5 +339,46 @@ class Component
     {
         if (sceneManager != undefined)
             sceneManager.unregister(this.model.name)
+    }
+
+    _createMaterial(componentType)
+    {
+        switch(componentType.materialType)
+        {
+            case MATERIALS.GLASS:
+                return new THREE.MeshPhysicalMaterial({ 
+                    color: 0xffffff, 
+                    transparent: false, 
+                    opacity: 1,
+                    transmission: 1, 
+                    roughness: 0.5, 
+                    metalness: 0,  
+                    envMap: this.assetMap.get(CUBEMAP),
+                    envMapIntensity: 0.1,
+                    ior: 1.5,
+                    reflectivity: 0.05,
+                    specularIntensity: 1,
+                    iridescence: 1,
+                    iridescenceIOR: 1.5,
+                    thickness: 5
+                });
+            case MATERIALS.METAL:
+                return new THREE.MeshStandardMaterial({ 
+                    color: 0xffffff,
+                    roughness: 0.01, 
+                    metalness: 0.99, 
+                    envMap: this.assetMap.get(CUBEMAP),
+                    envMapIntensity: 0.1
+                });
+            case MATERIALS.WOOD:
+                return new THREE.MeshStandardMaterial({ 
+                    color: 0xffffff, 
+                    roughness: 0.9, 
+                    metalness: 0,
+                    map: this.assetMap.get(WOOD)  
+                });
+            default:
+                return new THREE.MeshLambertMaterial({color: componentType.color, transparent: true, opacity: 0.5})
+        }
     }
 }

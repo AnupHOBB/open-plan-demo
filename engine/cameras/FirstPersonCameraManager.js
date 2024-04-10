@@ -14,7 +14,8 @@ export class FirstPersonCameraManager extends CameraManager
     constructor(name, fov) 
     { 
         super(name)
-        this.core = new FirstPersonCameraManagerCore(fov) 
+        this.core = new FirstPersonCameraManagerCore(fov)
+        this.moveSensitivity = 0.1 
     }
 
     /**
@@ -25,7 +26,7 @@ export class FirstPersonCameraManager extends CameraManager
     {
         if (inputManager != null)
         {
-            inputManager.registerKeyEvent((w,s,a,d) => this.core.onKeyinput(w,s,a,d))
+            inputManager.registerKeyEvent(map => this.core.onKeyinput(map, this.moveSensitivity))
             inputManager.registerLMBMoveEvent((dx, dy) => this.core.onMoveEvent(dx, dy))
             inputManager.setCursorSensitivity(0.05)
         }
@@ -46,6 +47,20 @@ export class FirstPersonCameraManager extends CameraManager
      * @param {Number} z z-coordinate in world space 
      */
     setRotation(x, y, z) { this.core.setRotation(x, y, z) }
+
+    /**
+     * Sets the position where the camera should look
+     * @param {Number} x x-coordinate in world space
+     * @param {Number} y y-coordinate in world space
+     * @param {Number} z z-coordinate in world space 
+     */
+    setLookAt(x, y, z) { this.core.camera.lookAt(x, y, z) }
+
+    /**
+     * Sets the sensitivity value for camera movement
+     * @param {Number} sensitivity sensitivity value that affects camera movement
+     */
+    setMovementSensitivity(sensitivity) { this.moveSensitivity = sensitivity }
 
     /**
      * Sets the camera aspect ratio
@@ -106,16 +121,16 @@ class FirstPersonCameraManagerCore extends PerspectiveCamera
      * Called by InputManager whenever it detects key strokes.
      * This function moves the camera around based on user input.
      * @param {Map} keyMap map consisting of keys that are currently being pressed by user
+     * @param {Number} sensitivity sensitivity value that affects camera movement
      */
-    onKeyinput(keyMap) 
+    onKeyinput(keyMap, sensitivity) 
     {
-        let scale = 0.1
         let front = new THREE.Vector3()
         this.camera.getWorldDirection(front)
         let right = Maths.cross(front, new THREE.Vector3(0, 1, 0))
         let newPosition = new THREE.Vector3()
-        front = new THREE.Vector3(front.x * scale, front.y * scale, front.z * scale)
-        right = new THREE.Vector3(right.x * scale, right.y * scale, right.z * scale)
+        front = new THREE.Vector3(front.x * sensitivity, front.y * sensitivity, front.z * sensitivity)
+        right = new THREE.Vector3(right.x * sensitivity, right.y * sensitivity, right.z * sensitivity)
         if (keyMap.get('w') != undefined)
         {
             newPosition = Maths.addVectors(this.camera.position, front)
