@@ -295,10 +295,7 @@ class Component
         this.width = width
         this.height = componentType.height
         this.assetMap = assetMap
-
-        let material = this._createMaterial(componentType)
-        console.log(material)
-        this.model = new ENGINE.StaticModel(name, new THREE.BoxGeometry(width, this.height, DEPTH), material, false, false)
+        this.model = new ENGINE.StaticModel(name, new THREE.BoxGeometry(width, this.height, DEPTH), this._createMaterial(componentType), false, false)
     }
 
     setWidth(width) 
