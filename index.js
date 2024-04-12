@@ -5,11 +5,12 @@ import {GLTFLoader} from './node_modules/three/examples/jsm/loaders/GLTFLoader.j
 import {DRACOLoader} from './node_modules/three/examples/jsm/loaders/DRACOLoader.js'
 
 const CABINET = 'assets/openplan_90cm_Test01.glb'
-const LAYOUT_INDEX = 6 
+const LAYOUT_INDEX = 6
+const TANGENT_ANGLE_OF_ELEVATION = 0.17333333333333334 
 
 window.onload = () => 
 {
-    /*let loader = new ENGINE.AssetLoader()
+    /* let loader = new ENGINE.AssetLoader()
     let dracoLoader = new DRACOLoader()
     dracoLoader.setDecoderPath(ENGINE.DRACO_DECODER_PATH)
     let modelLoader = new GLTFLoader()
@@ -20,7 +21,7 @@ window.onload = () =>
         let sceneManager = new ENGINE.SceneManager(canvas, true)
         let input = new ENGINE.InputManager('Input')
         sceneManager.register(input)
-        let cameraManager = new ENGINE.StaticCameraManager('Camera', 15)
+        let cameraManager = new ENGINE.OrbitalCameraManager('Camera', 15)
         //let cameraManager = new ENGINE.FirstPersonCameraManager('Camera', 15)
         cameraManager.setPosition(0, 1.3, -10)
         cameraManager.setLookAt(0, 1.3, 0)
@@ -44,7 +45,7 @@ window.onload = () =>
         boneCenter.position.y += offset
         //input.setCursorSensitivity(0.01)
         //cameraManager.setMovementSensitivity(0.5) 
-    })*/
+    }) */
 
     const ENVMAP_TEXTURES = ['./assets/cubemap/right.jpg','./assets/cubemap/left.jpg','./assets/cubemap/top.jpg','./assets/cubemap/bottom.jpg','./assets/cubemap/front.jpg','./assets/cubemap/back.jpg']
     const WOOD_TEXTURE = ['./assets/wood_03.webp']
@@ -58,20 +59,65 @@ function setupBoxCabinetScene(assets)
 {
     let canvas = document.querySelector('canvas')
     let sceneManager = new ENGINE.SceneManager(canvas, true)
-    let cameraManager = new ENGINE.StaticCameraManager('Camera', 15)
-    cameraManager.setPosition(5, 1.4, -15)
+    let cameraManager = new ENGINE.OrbitalCameraManager('Camera', 15)
+    cameraManager.addYawRestriction(newPos => {
+        let originalFront = new THREE.Vector3(0, 0, 1)
+        let lookAt = cameraManager.getLookAt()
+        let newFront = ENGINE.Maths.normalize(ENGINE.Maths.subtractVectors(lookAt, newPos))
+        return [ENGINE.Maths.dot(originalFront, newFront) > 0.1, newPos]
+    })
+    cameraManager.addPitchRestriction(newPos => { 
+        let originalUp = new THREE.Vector3(0, 1, 0)
+        let lookAt = cameraManager.getLookAt()
+        let newFront = ENGINE.Maths.normalize(ENGINE.Maths.subtractVectors(lookAt, newPos))
+        let newRight = ENGINE.Maths.cross(newFront, new THREE.Vector3(0, 1, 0))
+        let newUp = ENGINE.Maths.cross(newRight, newFront)
+        return [ENGINE.Maths.dot(originalUp, newUp) > 0.2, newPos]
+    })
+    cameraManager.setZoomSensitivity(1)
+
+    cameraManager.setPosition(0, 1.4, -15)
     cameraManager.setLookAt(0, 1.4, 0)
     sceneManager.register(cameraManager)
     sceneManager.setActiveCamera('Camera')
     sceneManager.setSizeInPercent(0.68, 1)
     sceneManager.setBackground(assets.get(CUBEMAP))
     let directLight = new ENGINE.PointLight('DirectLight', new THREE.Color(1, 1, 1), 1)//, 70)
-    directLight.setPosition(5, 20, -10)
+    directLight.setPosition(0, 20, -10)
     sceneManager.register(directLight)
+
+    let input = new ENGINE.InputManager('Input')
+    sceneManager.register(input)
+    cameraManager.registerInput(input)
 
     let family = FAMILIES.FAMILY1
     let cabinet = new Cabinet(family, sceneManager, assets)
     cabinet.setWidth(2)
+
+    setCameraDistance(cabinet.getWidth(), cabinet.getHeight())
+
+    function setCameraDistance(width, height, shouldReset)
+    {
+        let highest = width > height ? width : height 
+        let distance = highest/TANGENT_ANGLE_OF_ELEVATION
+        let elevation = height/2
+        /* if (shouldReset)
+        {
+            cameraManager.setPosition(0, elevation, -distance)
+            cameraManager.setLookAt(0, elevation, 0)
+        }
+        else
+        {
+            let lookAt = cameraManager.getLookAt()
+            let pos = cameraManager.getPosition()
+            let targetToCam = ENGINE.Maths.normalize(ENGINE.Maths.subtractVectors(pos, lookAt))
+            let scaledTargetToCam = ENGINE.Maths.scaleVector(targetToCam, distance)
+            let newPos = ENGINE.Maths.addVectors(lookAt, scaledTargetToCam)
+            cameraManager.setPosition(newPos.x, newPos.y, newPos.z)
+        } */
+        cameraManager.setPosition(0, elevation, -distance)
+        cameraManager.setLookAt(0, elevation, 0)
+    }
 
     function initializeFamilyRadioButtons()
     {   
@@ -88,6 +134,8 @@ function setupBoxCabinetScene(assets)
             radioButtonFamily2.checked = false
             radioButtonFamily3.checked = false
             emptyTextFields()
+
+            setCameraDistance(cabinet.getWidth(), cabinet.getHeight(), true)
         })
 
         let radioButtonFamily2 = document.getElementById('radio-family2')
@@ -102,6 +150,8 @@ function setupBoxCabinetScene(assets)
             radioButtonFamily2.checked = true
             radioButtonFamily3.checked = false
             emptyTextFields()
+
+            setCameraDistance(cabinet.getWidth(), cabinet.getHeight(), true)
         })
 
         let radioButtonFamily3 = document.getElementById('radio-family3')
@@ -116,6 +166,8 @@ function setupBoxCabinetScene(assets)
             radioButtonFamily2.checked = false
             radioButtonFamily3.checked = true
             emptyTextFields()
+
+            setCameraDistance(cabinet.getWidth(), cabinet.getHeight(), true)
         })
         let oldLayoutButtons = sideBar.children[LAYOUT_INDEX]
         let newLayoutButtons = createLayoutRadioButtons(FAMILIES.FAMILY1)
@@ -164,6 +216,7 @@ function setupBoxCabinetScene(assets)
                     input.checked = (j == i)
                 }
                 cabinet.switchLayout(family[i])
+                setCameraDistance(cabinet.getWidth(), cabinet.getHeight(), false)
             })
             radioItemContainer.appendChild(input)
             radioContainer.appendChild(radioItemContainer)

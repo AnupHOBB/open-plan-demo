@@ -69,6 +69,12 @@ export class OrbitalCameraManager extends CameraManager
     setLookAt(x, y, z) { this.core.setLookAt(x, y, z)  }
 
     /**
+     * Gets the position where the camera is looking at
+     * @returns {THREE.Vector3} world space position of camera 
+     */
+    getLookAt() { return this.core.lookAt  }
+
+    /**
      * Sets the sensitivity of the camera pan movement
      * @param {Number} sensitivity the sensitivity value for camera pan
      */
@@ -129,6 +135,23 @@ export class OrbitalCameraManager extends CameraManager
      * @param {Function} restriction callback function that decides if the object position should be updated
      */
     addPitchRestriction(restriction) { this.core.addPitchRestriction(restriction) }
+
+    /**
+     * Return camera front vector
+     * @returns {THREE.Vector3} front vector of camera
+     */
+    getFrontVector() { return this.core.front }
+
+    /**
+     * Return camera right vector
+     * @returns {THREE.Vector3} right vector of camera
+     */
+    getRightVector() { return this.core.right }
+    /**
+     * Return camera up vector
+     * @returns {THREE.Vector3} up vector of camera
+     */
+    getUpVector() { return this.core.up }
 }
 
 /**

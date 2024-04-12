@@ -59,6 +59,7 @@ export class Cabinet
         this.activeLayout = family[0]
         this.sceneManager = sceneManager
         this.assetMap = assetMap
+        this.width = MIN_WIDTH
         this.setWidth(MIN_WIDTH)
     }
 
@@ -106,6 +107,10 @@ export class Cabinet
         for (let column of this.columns)
             column.setHeight(height)
     }
+
+    getWidth() { return this.width }
+
+    getHeight() { return this.columns[0].height }
 
     switchLayout(layout)
     {  
