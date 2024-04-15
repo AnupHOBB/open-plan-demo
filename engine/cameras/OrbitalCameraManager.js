@@ -16,7 +16,11 @@ export class OrbitalCameraManager extends CameraManager
     constructor(name, fov) 
     { 
         super(name)
-        this.core = new OrbitalCameraManagerCore(fov) 
+        this.core = new OrbitalCameraManagerCore(fov)
+        this.isGradualResetActive = false
+        this.gradualResetTargetPosition = this.core.camera.position
+        this.gradualResetLookAt = this.core.lookAt
+        this.gradualResetSpeed = 1
     }
 
     /**
@@ -152,6 +156,20 @@ export class OrbitalCameraManager extends CameraManager
      * @returns {THREE.Vector3} up vector of camera
      */
     getUpVector() { return this.core.up }
+
+    startGradualReset(targetPosition, targetLookAt, speed)
+    {
+        this.gradualResetTargetPosition = targetPosition
+        this.gradualResetLookAt = targetLookAt
+        this.gradualResetSpeed = speed
+        this.isGradualResetActive = true
+    }
+
+    onSceneRender()
+    {
+        if (this.isGradualResetActive)
+            this.isGradualResetActive = this.core.gradualReset(this.gradualResetTargetPosition, this.gradualResetLookAt, this.gradualResetSpeed)
+    }
 }
 
 /**
@@ -274,5 +292,21 @@ class OrbitalCameraManagerCore extends PerspectiveCamera
         let vLookAt2target = Maths.subtractVectors(target, this.lookAt)
         let dot = Maths.dot(vLookAt2target, Maths.scaleVector(new THREE.Vector3(this.front.x, 0, this.front.z), -1))
         return [dot > 0.017, target]
+    }
+
+    gradualReset(targetPosition, targetLookAt, speed)
+    {
+        let direction = Maths.subtractVectors(targetPosition, this.camera.position)
+        let distance = direction.length()
+        if (distance > 0)
+        {
+            let directionNormal = Maths.normalize(direction)
+            let delta = distance > speed ? speed : distance
+            let newPosition = Maths.addVectors(this.camera.position, Maths.scaleVector(directionNormal, delta))
+            this.setPosition(newPosition.x, newPosition.y, newPosition.z)
+            this.setLookAt(targetLookAt.x, targetLookAt.y, targetLookAt.z)
+            return true
+        }
+        return false
     }
 }

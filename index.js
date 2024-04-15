@@ -117,6 +117,7 @@ function setupBoxCabinetScene(assets)
         } */
         cameraManager.setPosition(0, elevation, -distance)
         cameraManager.setLookAt(0, elevation, 0)
+        //cameraManager.startGradualReset(new THREE.Vector3(0, elevation, -distance), new THREE.Vector3(0, elevation, 0), 0.5)
     }
 
     function initializeFamilyRadioButtons()
