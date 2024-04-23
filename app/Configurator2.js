@@ -1,47 +1,6 @@
-import * as THREE from '../node_modules/three/src/Three.js'
 import * as ENGINE from '../engine/Engine.js'
-import { Cabinet } from './Configurator.js'
-
-const MATERIALS = {
-    WOOD : 'wood',
-    GLASS : 'glass',
-    METAL : 'metal'
-}
 
 export const ASSET_MAP = new Map()
-
-/* export const LAYOUTS = {
-    LAYOUT1: {type: '1', bottom : COMPONENTS.BOTTOM_CABINET, top : COMPONENTS.UPPER_GLASS_CABINET,
-        getBottomHeight : function(columnHeight) { return (columnHeight > 2.2) ? 0.9 : 0.8 }
-    },
-    LAYOUT2: {type: '2', bottom : COMPONENTS.BOTTOM_DRAWER, top : COMPONENTS.TOP_DRAWER, getBottomHeight : function() { return 0.3 }}, 
-    LAYOUT3: {type: '3', bottom : COMPONENTS.BOTTOM_CABINET, top : COMPONENTS.UPPER_GLASS_CABINET, getBottomHeight : function() { return 0.8 }},
-    LAYOUT4: {type: '4', bottom : COMPONENTS.UPPER_GLASS_CABINET, getBottomHeight : function() { return 0 } } 
-}
-
-export const FAMILIES = {
-    FAMILY1: [LAYOUTS.LAYOUT1, LAYOUTS.LAYOUT2],
-    FAMILY2: [LAYOUTS.LAYOUT2, LAYOUTS.LAYOUT3],
-    FAMILY3: [LAYOUTS.LAYOUT1, LAYOUTS.LAYOUT4],
-} */
-
-export const PIECES = {
-    LEFT_DOOR : 'leftDoor',
-    RIGHT_DOOR : 'rightDoor',
-    SHELF : 'shelf',
-    LEFT_WALL : 'leftWall',
-    RIGHT_WALL : 'rightWall',
-    TOP : 'top',
-    BODY : 'body'
-}
-
-
-/* const COMPONENTS = Object.freeze({
-    BOTTOM_DRAWER : {materialType: MATERIALS.WOOD, type: 'BottomDrawer', height: 0.3, color: 0xFF0000},
-    TOP_DRAWER : {materialType: MATERIALS.WOOD, type: 'TopDrawer', height: 0.1, color: 0x00FF00},
-    BOTTOM_CABINET : {materialType: MATERIALS.METAL, type: 'BottomCabinet', height: 0.8, color: 0x0000FF},
-    UPPER_GLASS_CABINET : {materialType: MATERIALS.GLASS, type: 'UpperGlassCabinet', height: 1.8, color: 0xFFFFFF}
-}) */
 
 export const COMPONENTS = {
     BOTTOM_CABINET : {
@@ -78,6 +37,66 @@ export const COMPONENTS = {
     }
 }
 
+class Piece
+{
+    constructor(mesh)
+    {
+        this.mesh = mesh
+        this.bonesWidth = []
+        this.bonesHeight = []
+        this.bonesDepth = []
+        this._collectBones(mesh)
+    }
+
+    setPosition(x, y, z) { this.mesh.position.set(x, y, z) }
+
+    getPosition() { return this.mesh.getPosition() }
+
+    offset(x, y, z)
+    {
+        let position = this.mesh.position
+        position.x += x
+        position.y += y
+        position.z += z
+        this.setPosition(position.x, position.y, position.z)
+    }
+
+    setRotation(x, y, z) { this.mesh.rotation.set(x, y, z) }
+
+    moveWidthBones(delta) 
+    { 
+        for (let bone of this.bonesWidth)
+            bone.position.x += delta
+    }
+
+    moveHeightBones(delta) 
+    {
+        for (let bone of this.bonesHeight)
+            bone.position.y += delta
+    }
+
+    moveDepthBones(delta) 
+    {
+        for (let bone of this.bonesDepth)
+            bone.position.z -= delta
+    }
+
+    _collectBones(object3D)
+    {
+        this._traversePieceForBones(object3D, this.bonesWidth, 'Width')
+        this._traversePieceForBones(object3D, this.bonesHeight, 'Height')
+        this._traversePieceForBones(object3D, this.bonesDepth, 'Depth')
+    }
+
+    _traversePieceForBones(object3D, boneArray, name)
+    {
+        ENGINE.Misc.postOrderTraversal(object3D, mesh => {
+            if (mesh != undefined && mesh.isBone && mesh.name.includes(name))
+                boneArray.push(mesh)
+        })
+    }
+}
+
 class Component
 {
     constructor(json)
@@ -87,42 +106,21 @@ class Component
         this.depth = json.depth
         this.thickness = json.thickness
         this.standHeight = json.standHeight
-        this.bonesWidth = []
-        this.bonesHeight = []
-        this.bonesDepth = []
         this.component = new ENGINE.SceneObject(json.name) 
-    }
-
-    setWidth(width) 
-    { 
-        let prevWidth = this.width
-        this.width = width
-        let delta = this.width - prevWidth
-        for (let bone of this.bonesWidth)
-            bone.position.x += delta
-    }
-
-    setHeight(height) 
-    {
-        let prevHeight = this.height
-        this.height = height
-        let delta = this.height - prevHeight
-        for (let bone of this.bonesHeight)
-            bone.position.y += delta
-    }
-
-    setDepth(depth) 
-    {
-        let prevDepth = this.depth
-        this.depth = depth
-        let delta = this.depth - prevDepth
-        for (let bone of this.bonesDepth)
-            bone.position.z -= delta
     }
 
     setPosition(x, y, z) { this.component.setPosition(x, y, z) }
 
     getPosition() { return this.component.getPosition() }
+
+    offset(x, y, z)
+    {
+        let position = this.getPosition()
+        position.x += x
+        position.y += y
+        position.z += z
+        this.setPosition(position.x, position.y, position.z)
+    }
 
     registerInScene(sceneManager)
     {
@@ -142,24 +140,8 @@ class Component
         if (object3D != undefined)
         {    
             this.component.attachObject3D(object3D)
-            this._collectBones(object3D)
         }
-        return object3D
-    }
-
-    _collectBones(object3D)
-    {
-        this._traversePieceForBones(object3D, this.bonesWidth, 'Width')
-        this._traversePieceForBones(object3D, this.bonesHeight, 'Height')
-        this._traversePieceForBones(object3D, this.bonesDepth, 'Depth')
-    }
-
-    _traversePieceForBones(object3D, boneArray, name)
-    {
-        ENGINE.Misc.postOrderTraversal(object3D, mesh => {
-            if (mesh != undefined && mesh.isBone && mesh.name.includes(name))
-                boneArray.push(mesh)
-        })
+        return new Piece(object3D)
     }
 
     _extractModel(key)
@@ -186,6 +168,60 @@ export class BottomCabinet extends Component
         this._repositionPieces()
     }
 
+    setWidth(width) 
+    { 
+        let prevWidth = this.width
+        this.width = width
+        let delta = this.width - prevWidth
+        if (this.body != undefined)
+            this.body.moveWidthBones(delta)
+        if (this.leftDoor != undefined)
+            this.leftDoor.moveWidthBones(delta/2)
+        if (this.rightDoor != undefined)
+        {    
+            this.rightDoor.moveWidthBones(-delta/2)
+            this.rightDoor.offset(delta, 0, 0)
+        }
+        if (this.rightWall != undefined)
+            this.rightWall.offset(delta, 0, 0)
+        if (this.shelf != undefined)
+            this.shelf.moveWidthBones(delta)
+        this.offset(-delta/2, 0, 0)
+    }
+
+    setHeight(height) 
+    {
+        let prevHeight = this.height
+        this.height = height
+        let delta = this.height - prevHeight
+        if (this.body != undefined)
+            this.body.moveHeightBones(delta)
+        if (this.leftDoor != undefined)
+            this.leftDoor.moveHeightBones(delta)
+        if (this.rightDoor != undefined)
+            this.rightDoor.moveHeightBones(delta)
+        if (this.leftWall != undefined)
+            this.leftWall.moveHeightBones(delta)
+        if (this.rightWall != undefined)
+            this.rightWall.moveHeightBones(delta)
+    }
+
+    setDepth(depth) 
+    {
+        let prevDepth = this.depth
+        this.depth = depth
+        let delta = this.depth - prevDepth
+        if (this.body != undefined)
+            this.body.moveDepthBones(delta)
+        if (this.leftWall != undefined)
+            this.leftWall.moveDepthBones(delta)
+        if (this.rightWall != undefined)
+            this.rightWall.moveDepthBones(delta)
+        if (this.shelf != undefined)
+            this.shelf.moveDepthBones(delta)
+        this.offset(0, 0, delta/2)
+    }
+
     openDoors() { this._rotateDoors(135) }
 
     closeDoors() { this._rotateDoors(0) }
@@ -193,23 +229,23 @@ export class BottomCabinet extends Component
     _repositionPieces()
     {
         if (this.leftDoor != undefined)
-            this.leftDoor.position.set(-((this.width/2) - this.thickness), this.standHeight + this.thickness, this.depth/2)
+            this.leftDoor.setPosition(-((this.width/2) - this.thickness), this.standHeight + this.thickness, this.depth/2)
         if (this.rightDoor != undefined)
-            this.rightDoor.position.set((this.width/2) - this.thickness, this.standHeight + this.thickness, this.depth/2)
+            this.rightDoor.setPosition((this.width/2) - this.thickness, this.standHeight + this.thickness, this.depth/2)
         if (this.leftWall != undefined)
-            this.leftWall.position.set(-this.width/2, this.standHeight + this.thickness, 0)
+            this.leftWall.setPosition(-this.width/2, this.standHeight + this.thickness, 0)
         if (this.rightWall != undefined)
-            this.rightWall.position.set(this.width/2, this.standHeight + this.thickness, 0)
+            this.rightWall.setPosition(this.width/2, this.standHeight + this.thickness, 0)
         if (this.shelf != undefined)
-            this.shelf.position.set(0, ((this.height - this.standHeight)/2) + this.standHeight, 0)
+            this.shelf.setPosition(0, ((this.height - this.standHeight)/2) + this.standHeight, 0)
     }
 
     _rotateDoors(angleInDeg)
     {
         if (this.leftDoor != undefined)
-            this.leftDoor.rotation.set(0, ENGINE.Maths.toRadians(-angleInDeg), 0)
+            this.leftDoor.setRotation(0, ENGINE.Maths.toRadians(-angleInDeg), 0)
         if (this.rightDoor != undefined)
-            this.rightDoor.rotation.set(0, ENGINE.Maths.toRadians(angleInDeg), 0) 
+            this.rightDoor.setRotation(0, ENGINE.Maths.toRadians(angleInDeg), 0) 
     }
 }
 
@@ -228,17 +264,71 @@ export class TopCabinet extends Component
         this._repositionPieces()
     }
 
+    setWidth(width) 
+    { 
+        let prevWidth = this.width
+        this.width = width
+        let delta = this.width - prevWidth
+        if (this.body != undefined)
+            this.body.moveWidthBones(delta)
+        if (this.leftDoor != undefined)
+            this.leftDoor.moveWidthBones(delta/2)
+        if (this.rightDoor != undefined)
+        {    
+            this.rightDoor.moveWidthBones(-delta/2)
+            this.rightDoor.offset(delta, 0, 0)
+        }
+        if (this.rightWall != undefined)
+            this.rightWall.offset(delta, 0, 0)
+        if (this.shelf != undefined)
+            this.shelf.moveWidthBones(delta)
+        this.offset(-delta/2, 0, 0)
+    }
+
+    setHeight(height) 
+    {
+        let prevHeight = this.height
+        this.height = height
+        let delta = this.height - prevHeight
+        if (this.body != undefined)
+            this.body.moveHeightBones(delta)
+        if (this.leftDoor != undefined)
+            this.leftDoor.moveHeightBones(delta)
+        if (this.rightDoor != undefined)
+            this.rightDoor.moveHeightBones(delta)
+        if (this.leftWall != undefined)
+            this.leftWall.moveHeightBones(delta)
+        if (this.rightWall != undefined)
+            this.rightWall.moveHeightBones(delta)
+    }
+
+    setDepth(depth) 
+    {
+        let prevDepth = this.depth
+        this.depth = depth
+        let delta = this.depth - prevDepth
+        if (this.body != undefined)
+            this.body.moveDepthBones(delta)
+        if (this.leftWall != undefined)
+            this.leftWall.moveDepthBones(delta)
+        if (this.rightWall != undefined)
+            this.rightWall.moveDepthBones(delta)
+        if (this.shelf != undefined)
+            this.shelf.moveDepthBones(delta)
+        this.offset( 0, 0, delta/2)
+    }
+
     _repositionPieces()
     {
         if (this.leftDoor != undefined)
-            this.leftDoor.position.set(-(this.width/2) + this.thickness, this.standHeight + this.thickness, this.depth/2)
+            this.leftDoor.setPosition(-((this.width/2) - this.thickness), this.standHeight + this.thickness, this.depth/2)
         if (this.rightDoor != undefined)
-            this.rightDoor.position.set((this.width/2) - this.thickness, this.standHeight + this.thickness, this.depth/2)
+            this.rightDoor.setPosition((this.width/2) - this.thickness, this.standHeight + this.thickness, this.depth/2)
         if (this.leftWall != undefined)
-            this.leftWall.position.set(-this.width/2, this.standHeight + this.thickness, 0)
+            this.leftWall.setPosition(-this.width/2, this.standHeight + this.thickness, 0)
         if (this.rightWall != undefined)
-            this.rightWall.position.set(this.width/2, this.standHeight + this.thickness, 0)
+            this.rightWall.setPosition(this.width/2, this.standHeight + this.thickness, 0)
         if (this.shelf != undefined)
-            this.shelf.position.set(0, ((this.height - this.standHeight)/2) + this.standHeight, 0)
+            this.shelf.setPosition(0, ((this.height - this.standHeight)/2) + this.standHeight, 0)
     }
 }
