@@ -3,56 +3,89 @@ import * as ENGINE from './engine/Engine.js'
 import { Cabinet, FAMILIES, CUBEMAP, WOOD } from './app/Configurator.js'
 import {GLTFLoader} from './node_modules/three/examples/jsm/loaders/GLTFLoader.js'
 import {DRACOLoader} from './node_modules/three/examples/jsm/loaders/DRACOLoader.js'
+import { FBXLoader } from './node_modules/three/examples/jsm/loaders/FBXLoader.js'
 
-const CABINET = 'assets/openplan_90cm_Test01.glb'
+import * as CONFIGURATOR2 from './app/Configurator2.js'
+
 const LAYOUT_INDEX = 6
-const TANGENT_ANGLE_OF_ELEVATION = 0.17333333333333334 
+const TANGENT_ANGLE_OF_ELEVATION = 0.17333333333333334
 
 window.onload = () => 
 {
-    /* let loader = new ENGINE.AssetLoader()
-    let dracoLoader = new DRACOLoader()
-    dracoLoader.setDecoderPath(ENGINE.DRACO_DECODER_PATH)
-    let modelLoader = new GLTFLoader()
-    modelLoader.setDRACOLoader(dracoLoader)
-    loader.addLoader(CABINET, CABINET, modelLoader)
-    loader.execute(p=>{}, assetMap=>{
+    const ENVMAP_TEXTURES = ['./assets/cubemap/right.jpg','./assets/cubemap/left.jpg','./assets/cubemap/top.jpg','./assets/cubemap/bottom.jpg','./assets/cubemap/front.jpg','./assets/cubemap/back.jpg']
+    let loader = new ENGINE.AssetLoader()
+    loader.addLoader(CUBEMAP, ENVMAP_TEXTURES, new THREE.CubeTextureLoader())
+    for (let componentKey in CONFIGURATOR2.COMPONENTS)
+    {
+        let componentJson = CONFIGURATOR2.COMPONENTS[componentKey]
+        let assetJson = componentJson['assets']
+        for (let key in assetJson)
+        {
+            let array = assetJson[key]
+            for (let path of array)
+            {    
+                let dracoLoader = new DRACOLoader()
+                dracoLoader.setDecoderPath(ENGINE.DRACO_DECODER_PATH)
+                let modelLoader = new GLTFLoader()
+                modelLoader.setDRACOLoader(dracoLoader)
+                loader.addLoader(componentJson.name+path, path, modelLoader)
+                //loader.addLoader(componentJson.name+path, path, new FBXLoader())
+            }
+        }
+    }
+    loader.execute(CONFIGURATOR2.ASSET_MAP, assets => {
+        //console.log(assets)
         let canvas = document.querySelector('canvas')
         let sceneManager = new ENGINE.SceneManager(canvas, true)
-        let input = new ENGINE.InputManager('Input')
-        sceneManager.register(input)
         let cameraManager = new ENGINE.OrbitalCameraManager('Camera', 15)
-        //let cameraManager = new ENGINE.FirstPersonCameraManager('Camera', 15)
-        cameraManager.setPosition(0, 1.3, -10)
-        cameraManager.setLookAt(0, 1.3, 0)
-        cameraManager.registerInput(input)
+        cameraManager.addYawRestriction(newPos => {
+            let originalFront = new THREE.Vector3(0, 0, -1)
+            let lookAt = cameraManager.getLookAt()
+            let newFront = ENGINE.Maths.normalize(ENGINE.Maths.subtractVectors(lookAt, newPos))
+            return [ENGINE.Maths.dot(originalFront, newFront) > 0.1, newPos]
+        })
+        cameraManager.addPitchRestriction(newPos => { 
+            let originalUp = new THREE.Vector3(0, 1, 0)
+            let lookAt = cameraManager.getLookAt()
+            let newFront = ENGINE.Maths.normalize(ENGINE.Maths.subtractVectors(lookAt, newPos))
+            let newRight = ENGINE.Maths.cross(newFront, new THREE.Vector3(0, 1, 0))
+            let newUp = ENGINE.Maths.cross(newRight, newFront)
+            return [ENGINE.Maths.dot(originalUp, newUp) > 0.2, newPos]
+        })
+        cameraManager.setZoomSensitivity(1)
+        cameraManager.setPosition(0, 1, 8)
+        cameraManager.setLookAt(0, 1, 0) 
         sceneManager.register(cameraManager)
         sceneManager.setActiveCamera('Camera')
         sceneManager.setSizeInPercent(0.68, 1)
-        sceneManager.setBackground(new THREE.Color(0, 0, 0))
-        let directLight = new ENGINE.DirectLight('DirectLight', new THREE.Color(1, 1, 1), 0.5)
-        directLight.setPosition(5, 20, -10)
+        sceneManager.setBackground(assets.get(CUBEMAP))
+        let directLight = new ENGINE.DirectLight('DirectLight', new THREE.Color(1, 1, 1), 10)
+        directLight.setPosition(0, 5, 3)
+        directLight.setLookAt(0, 100, 0)
         sceneManager.register(directLight)
+        let input = new ENGINE.InputManager('Input')
+        sceneManager.register(input)
+        cameraManager.registerInput(input)
+        //let comp = new CONFIGURATOR2.TopCabinet()
+        let comp = new CONFIGURATOR2.BottomCabinet()
+        comp.registerInScene(sceneManager)
+        setTimeout(()=>{
+            comp.setHeight(1.5)
+            //comp.setWidth(1)
+            //comp.setDepth(1.5)
+            console.log('dimensions changed')
+        }, 5000)
+    })
+}
 
-        let cabinetModel = new ENGINE.MeshModel('Cabinet', assetMap.get(CABINET), true)
-        sceneManager.register(cabinetModel)
-        let offset = 0.1
-        let boneLeft = cabinetModel.getBone('BoneLeft')
-        boneLeft.position.y += offset
-        let boneRight = cabinetModel.getBone('BoneRight')
-        boneRight.position.y += offset
-        let boneCenter = cabinetModel.getBone('neutral_bone_1')
-        boneCenter.position.y += offset
-        //input.setCursorSensitivity(0.01)
-        //cameraManager.setMovementSensitivity(0.5) 
-    }) */
-
+function runBoxBasedConfigurator()
+{
     const ENVMAP_TEXTURES = ['./assets/cubemap/right.jpg','./assets/cubemap/left.jpg','./assets/cubemap/top.jpg','./assets/cubemap/bottom.jpg','./assets/cubemap/front.jpg','./assets/cubemap/back.jpg']
     const WOOD_TEXTURE = ['./assets/wood_03.webp']
     let loader = new ENGINE.AssetLoader()
     loader.addLoader(CUBEMAP, ENVMAP_TEXTURES, new THREE.CubeTextureLoader())
     loader.addLoader(WOOD, WOOD_TEXTURE, new THREE.TextureLoader())
-    loader.execute(p=>{}, assets => setupBoxCabinetScene(assets))
+    loader.execute(new Map(), assets => setupBoxCabinetScene(assets))
 }
 
 function setupBoxCabinetScene(assets)
@@ -101,23 +134,7 @@ function setupBoxCabinetScene(assets)
         let highest = width > height ? width : height 
         let distance = highest/TANGENT_ANGLE_OF_ELEVATION
         let elevation = height/2
-        /* if (shouldReset)
-        {
-            cameraManager.setPosition(0, elevation, -distance)
-            cameraManager.setLookAt(0, elevation, 0)
-        }
-        else
-        {
-            let lookAt = cameraManager.getLookAt()
-            let pos = cameraManager.getPosition()
-            let targetToCam = ENGINE.Maths.normalize(ENGINE.Maths.subtractVectors(pos, lookAt))
-            let scaledTargetToCam = ENGINE.Maths.scaleVector(targetToCam, distance)
-            let newPos = ENGINE.Maths.addVectors(lookAt, scaledTargetToCam)
-            cameraManager.setPosition(newPos.x, newPos.y, newPos.z)
-        } */
-        cameraManager.setPosition(0, elevation, -distance)
-        cameraManager.setLookAt(0, elevation, 0)
-        //cameraManager.startGradualReset(new THREE.Vector3(0, elevation, -distance), new THREE.Vector3(0, elevation, 0), 0.5)
+        cameraManager.startGradualReset(new THREE.Vector3(0, elevation, -distance), new THREE.Vector3(0, elevation, 0), 1)
     }
 
     function initializeFamilyRadioButtons()

@@ -199,6 +199,7 @@ class Column
     {
         if (this._isHeightValid(height))
         {
+            //TODO slight modification to this logic
             let newBottomHeight = this.layout.getBottomHeight(height)
             let deltaBottomHeight = newBottomHeight - this.bottomHeight
             let deltaBottomHeightPerComponent = deltaBottomHeight/this.bottomComponents.length
@@ -222,6 +223,7 @@ class Column
     {
         if (position != undefined && position.x != undefined && position.y != undefined && position.z != undefined)
         {
+            //TODO slight modification to this logic
             let componentPosition = { x: position.x, y: position.y, z: position.z }
             for (let component of this.bottomComponents)
             {

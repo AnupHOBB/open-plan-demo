@@ -15,14 +15,10 @@ export class AssetLoader
 
     /**
      * Delegates call to AssetLoaderCore load
-     * @param {Function} onProgress callback that is called while the assets are loading
      * @param {Function} onComplete callback that is called after all assets are loaded
+     * @param {Function} onProgress callback that is called while the assets are loading
      */
-    execute(onProgress, onComplete) 
-    {
-        this.core.assetMap.clear() 
-        this.core.load(0, onProgress, onComplete) 
-    }
+    execute(assetMap, onComplete, onProgress) { this.core.load(0, assetMap, onComplete, onProgress == undefined ? p => {} : onProgress) }
 }
 
 /**
@@ -33,8 +29,8 @@ class AssetLoaderCore
     constructor()
     {
         this.loaderMap = new Map()
+        this.downloadedUrls = new Map()
         this.urls = []
-        this.assetMap = new Map()
     }
     
     /**
@@ -52,30 +48,43 @@ class AssetLoaderCore
     /**
      * Starts loading assets.
      * @param {Number} index index of asset url in urls array.
+     * @param {Map} assetMap map to store assets
      * @param {Function} onProgress callback that is called while the assets are loading
      * @param {Function} onComplete callback that is called after all assets are loaded
      */
-    load(index, onProgress, onComplete)
+    load(index, assetMap, onComplete, onProgress)
     {
         if (index >= this.urls.length)
         {    
-            onComplete(this.assetMap)
+            onComplete(assetMap)
             this.loaderMap.clear()
+            this.downloadedUrls.clear()
             this.urls.splice(0, this.urls.length)
         }
         else
         {
             let loader = this.loaderMap.get(this.urls[index].url)
-            loader.load(this.urls[index].url, asset=>{
-                this.loaderMap.delete(this.urls[index].url)
-                this.assetMap.set(this.urls[index].name, asset)
-                onProgress(Math.round(((index + 1)/this.urls.length) * 100))
-                this.load(++index, onProgress, onComplete)
-            }, (xhr)=>{
-                let localProgress = Math.round((xhr.loaded/ xhr.total) * 100)
-                let globalProgress = index * 100
-                onProgress(Math.round((localProgress + globalProgress)/this.urls.length))
-            })
+            if (loader != undefined)
+            {
+                loader.load(this.urls[index].url, asset=>{
+                    this.loaderMap.delete(this.urls[index].url)
+                    this.downloadedUrls.set(this.urls[index].url, this.urls[index].name)
+                    assetMap.set(this.urls[index].name, asset)
+                    onProgress(Math.round(((index + 1)/this.urls.length) * 100))
+                    this.load(++index, assetMap, onComplete, onProgress)
+                }, (xhr)=>{
+                    let localProgress = Math.round((xhr.loaded/ xhr.total) * 100)
+                    let globalProgress = index * 100
+                    onProgress(Math.round((localProgress + globalProgress)/this.urls.length))
+                })
+            }
+            else
+            {
+                let name = this.downloadedUrls.get(this.urls[index].url)
+                let asset = assetMap.get(name)
+                assetMap.set(this.urls[index].name, Object.assign({}, asset))
+                this.load(++index, assetMap, onComplete, onProgress)
+            }
         }
     }
 }

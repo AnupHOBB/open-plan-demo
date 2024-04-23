@@ -23,6 +23,7 @@ export class SceneObject
                 this.scene = model.scene
         }
         this.children = []
+        this.childrenObject3D = []
         this.drawables = [{object: this.scene, isRayCastable: false}]
     }
 
@@ -101,9 +102,43 @@ export class SceneObject
             {    
                 this.scene.children.splice(i, 1)
                 model.scene.parent = null
-                let j = this.children.push(model)
+                let j = this.children.indexOf(model)
                 if (j > -1)
                     this.children.splice(j, 1)
+            }
+        }
+    }
+
+    /**
+     * Attaches another threejs object3D to this one
+     * @param {THREE.Object3D} object3D 
+     */
+    attachObject3D(object3D)
+    {
+        if (object3D != undefined)
+        {
+            object3D.parent = this.scene
+            this.scene.children.push(object3D)
+            this.childrenObject3D.push(object3D)
+        }
+    }
+
+    /**
+     * Detaches threejs object3D from this one
+     * @param {THREE.Object3D} object3D 
+     */
+    detachObject3D(object3D)
+    {
+        if (object3D != undefined)
+        {
+            let i = this.scene.children.indexOf(object3D)
+            if (i > -1)    
+            {    
+                this.scene.children.splice(i, 1)
+                object3D.parent = null
+                let j = this.childrenObject3D.indexOf(object3D)
+                if (j > -1)
+                    this.childrenObject3D.splice(j, 1)
             }
         }
     }
