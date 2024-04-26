@@ -1,4 +1,4 @@
-import * as ENGINE from '../engine/Engine.js'
+import * as ENGINE from '../framework/Framework.js'
 
 export const ASSET_MAP = new Map()
 
