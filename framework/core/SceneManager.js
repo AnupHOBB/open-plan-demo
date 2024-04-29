@@ -408,6 +408,21 @@ export class SceneManager
 
     changeOutlineStrength(strength) { this.sceneRenderer.changeOutlineStrength(strength) }
 
+    shootRay(rasterCoord)
+    {
+        if (rasterCoord != undefined && rasterCoord.x >= 0 && rasterCoord.x < this.width && rasterCoord.y >= 0 && rasterCoord.y < this.height)
+        {
+            let bounds = this.canvas.getBoundingClientRect()
+            let ndcX = (rasterCoord.x / bounds.width) *  2 - 1
+            let ndcY = -(rasterCoord.y / bounds.height) *  2 + 1
+            return this.raycast.raycast({x: ndcX, y: ndcY}, this.activeCameraManager)
+        }
+    }
+
+    outline(name) { this.sceneRenderer.outlineSceneObject(name) }
+
+    removeOutline(name) { this.sceneRenderer.removeSceneObjectOutline(name) }
+
     outlineNearestObjectAt(rasterCoord, onOutline)
     {
         if (rasterCoord != undefined && rasterCoord.x >= 0 && rasterCoord.x < this.width && rasterCoord.y >= 0 && rasterCoord.y < this.height)

@@ -2,6 +2,7 @@ import * as THREE from '../../node_modules/three/src/Three.js'
 import { DisplayComposer } from './composers/DisplayComposer.js'
 import { BloomComposer } from './composers/BloomComposer.js'
 import { SSAOComposer } from './composers/SSAOComposer.js'
+import { RenderComposer } from './composers/RenderComposer.js'
 
 /**
  * Renders the overall scene
@@ -19,7 +20,7 @@ export class SceneRenderer
         this.renderer.toneMapping = THREE.ACESFilmicToneMapping
         this.renderer.toneMappingExposure = 1
         this.renderer.setPixelRatio(window.devicePixelRatio)
-        this.composers = [new SSAOComposer(this.renderer), new BloomComposer(this.renderer), new DisplayComposer(this.renderer)]
+        this.composers = [new RenderComposer(this.renderer), new SSAOComposer(this.renderer), new BloomComposer(this.renderer), new DisplayComposer(this.renderer)]
         this.activeCamera = undefined
         this.sceneObjects = new Map()
     }
@@ -90,6 +91,70 @@ export class SceneRenderer
             composer.showNormalMap(show) 
     }
 
+    changeOutlineColor(visibleEdgeColor, hiddenEdgeColor) 
+    { 
+        let composer = this._getComposer('RenderComposer')
+        if (composer != undefined) 
+            composer.changeOutlineColor(visibleEdgeColor, hiddenEdgeColor) 
+    }
+
+    changeOutlineThickness(thickness) 
+    { 
+        let composer = this._getComposer('RenderComposer')
+        if (composer != undefined) 
+            composer.changeOutlineThickness(thickness) 
+    }
+
+    changeOutlineGlow(glow) 
+    { 
+        let composer = this._getComposer('RenderComposer')
+        if (composer != undefined) 
+            composer.changeOutlineGlow(glow) 
+    }
+
+    changeOutlineStrength(strength) 
+    { 
+        let composer = this._getComposer('RenderComposer')
+        if (composer != undefined) 
+            composer.changeOutlineStrength(strength) 
+    }
+
+    outlineSceneObject(name)
+    {
+        let composer = this._getComposer('RenderComposer')
+        if (composer != undefined) 
+        {    
+            let sceneObject = this.sceneObjects.get(name)
+            if (sceneObject != undefined)
+                composer.outline(sceneObject.getObject3D())
+        } 
+    }
+
+    outlineObject3D(object3D)
+    {
+        let composer = this._getComposer('RenderComposer')
+        if (composer != undefined) 
+            composer.outline(object3D) 
+    }
+
+    removeSceneObjectOutline(name)
+    {
+        let composer = this._getComposer('RenderComposer')
+        if (composer != undefined) 
+        {    
+            let sceneObject = this.sceneObjects.get(name)
+            if (sceneObject != undefined)
+                composer.removeOutline(sceneObject.getObject3D())
+        } 
+    }
+
+    removeObject3DOutline(object3D)
+    {
+        let composer = this._getComposer('RenderComposer')
+        if (composer != undefined) 
+            composer.removeOutline(object3D) 
+    }
+
     /**
      * Sets the camera where the whole scene will be rendered from its viewpoint
      * @param {THREE.Camera} camera camera object
@@ -99,6 +164,9 @@ export class SceneRenderer
         if (this.activeCamera != camera)
         {
             this.activeCamera = camera
+            let renderComposer = this._getComposer('RenderComposer')
+            if (renderComposer != undefined) 
+                renderComposer.setup(this.activeCamera)  
             let ssaoComposer = this._getComposer('SSAOComposer')
             if (ssaoComposer != undefined) 
                 ssaoComposer.setup(this.activeCamera)  
@@ -112,47 +180,13 @@ export class SceneRenderer
      * Adds the sceneObject into the scene object map
      * @param {SceneObject} sceneObject sceneObject that needs to be added to the scene object map
      */
-    addToScene(sceneObject)
-    {
-        this.sceneObjects.set(sceneObject.name, sceneObject)
-        /* let composer = this._getComposer('SSAOComposer')
-        if (composer != undefined) 
-            composer.addToScene(object3D) */
-    }
+    addToScene(sceneObject) { this.sceneObjects.set(sceneObject.name, sceneObject) }
 
     /**
      * Removes the sceneObject from the scene
      * @param {String} name name of the sceneObject that is to be removed
      */
-    removeFromScene(name)
-    {
-        this.sceneObjects.delete(name)
-        /* let composer = this._getComposer('SSAOComposer')
-        if (composer != undefined) 
-            composer.removeFromScene(object3D) */
-    }
-
-        /**
-     * Adds the threejs object into the scene as bloom object
-     * @param {THREE.Object3D} object3D name of the object3D that will be added
-     */
-    addToBloomScene(object3D)
-    {
-        let composer = this._getComposer('BloomComposer')
-        if (composer != undefined) 
-            composer.addToScene(object3D)
-    }
-
-    /**
-     * Removes the threejs object from the scene
-     * @param {THREE.Object3D} object3D name of the object3D that will be removed
-     */
-    removeFromBloomScene(object3D)
-    {
-        let composer = this._getComposer('BloomComposer')
-        if (composer != undefined) 
-            composer.removeFromScene(object3D)
-    }
+    removeFromScene(name) { this.sceneObjects.delete(name) }
 
     /**
      * Sets the width and height of canvas
@@ -171,7 +205,7 @@ export class SceneRenderer
      */
     setBackground(background)
     {
-        let composer = this._getComposer('SSAOComposer')
+        let composer = this._getComposer('RenderComposer')
         if (composer != undefined)
             composer.setBackground(background)
     }
@@ -199,9 +233,7 @@ export class SceneRenderer
                 for (let name of names)
                 {
                     let sceneObject = this.sceneObjects.get(name)
-                    if (composer.name == 'BloomComposer' && sceneObject.isLuminant())   
-                        composer.addToScene(sceneObject.getObject3D())
-                    if (composer.name == 'SSAOComposer' && !sceneObject.isLuminant())  
+                    if ((composer.name != 'BloomComposer') || ((composer.name == 'BloomComposer') && sceneObject.isLuminant()))
                         composer.addToScene(sceneObject.getObject3D())
                 }
                 composer.render(this.width, this.height, renderedTexture)
@@ -256,16 +288,6 @@ export class SceneRenderer
     setHighlightsColorBalance(highlightsRgb) { this.sceneRenderer.setHighlightsColorBalance(highlightsRgb) }
 ////////////////////////////////////Color Balance////////////////////////////////////////        
 ////////////////////////////////////OUTLINE//////////////////////////////////////// 
-    enableOutlining(enable) { this.sceneRenderer.enableOutlining(enable) }
-
-    changeOutlineColor(visibleEdgeColor, hiddenEdgeColor) { this.sceneRenderer.changeOutlineColor(visibleEdgeColor, hiddenEdgeColor) }
-
-    changeOutlineThickness(thickness) { this.sceneRenderer.changeOutlineThickness(thickness) }
-
-    changeOutlineGlow(glow) { this.sceneRenderer.changeOutlineGlow(glow) }
-
-    changeOutlineStrength(strength) { this.sceneRenderer.changeOutlineStrength(strength) }
-
     outlineNearestObjectAt(rasterCoord, onOutline)
     {
         if (rasterCoord != undefined && rasterCoord.x >= 0 && rasterCoord.x < this.width && rasterCoord.y >= 0 && rasterCoord.y < this.height)

@@ -1,5 +1,6 @@
 import { SceneComposer } from './SceneComposer.js'
 import { SSAOPass } from '../../../node_modules/three/examples/jsm/postprocessing/SSAOPass.js'
+import { MergerPass } from '../pass/MergerPass.js'
 
 export class SSAOComposer extends SceneComposer
 {
@@ -7,6 +8,8 @@ export class SSAOComposer extends SceneComposer
     {
         super('SSAOComposer', renderer)
         this.ssaoPass = undefined
+        this.mergerPass = new MergerPass()
+        this.composer.addPass(this.mergerPass)
     }
 
     /**
@@ -15,12 +18,14 @@ export class SSAOComposer extends SceneComposer
      */
     setup(camera)
     {
+        if (this.ssaoPass != undefined)
+            this.composer.removePass(this.ssaoPass)
         this.ssaoPass = new SSAOPass(this.scene, camera)
-        this.ssaoPass.output = SSAOPass.OUTPUT.Default
+        this.ssaoPass.output = SSAOPass.OUTPUT.SSAO
         this.ssaoPass.kernelRadius = 0.01
         this.ssaoPass.minDistance = 0.00004
         this.ssaoPass.maxDistance = 0.1
-        this.composer.addPass(this.ssaoPass)
+        this.composer.insertPass(this.ssaoPass, 0)
     }
 
     enable(enabled) { this.ssaoPass.output = enabled ? SSAOPass.OUTPUT.Default : SSAOPass.OUTPUT.Beauty }
@@ -47,23 +52,29 @@ export class SSAOComposer extends SceneComposer
      * Enables or disables the ambient occlusion map of scene
      * @param {Boolean} show if true then the ambient occlusion map of entire scene will be visible 
      */
-    showAOMap(show) { this.ssaoPass.output = show ? SSAOPass.OUTPUT.SSAO : SSAOPass.OUTPUT.Default }
+    showAOMap(show) {  this.mergerPass.showTexture2Only(show) }
 
     /**
      * Enables or disables the normal map of scene
      * @param {Boolean} show if true then the normal map of entire scene will be visible 
      */
-    showNormalMap(show) { this.ssaoPass.output = show ? SSAOPass.OUTPUT.Normal : SSAOPass.OUTPUT.Default }
+    showNormalMap(show) 
+    { 
+        this.ssaoPass.output = show ? SSAOPass.OUTPUT.Normal : SSAOPass.OUTPUT.SSAO
+        this.mergerPass.showTexture2Only(show) 
+    }
     
     /**
      * Renders the scene
      * @param {Number} width width of frame which will be rendered
      * @param {Number} height height of frame which will be rendered
+     * @param {THREE.Texture} renderedTexture the rendered scene from the previous composer
      */
-    render(width, height) 
+    render(width, height, renderedTexture) 
     {
         this.ssaoPass.width = width
         this.ssaoPass.height = height
+        this.mergerPass.updateTexture2(renderedTexture)
         this.composer.setSize(width, height) 
         this.composer.render()
     }

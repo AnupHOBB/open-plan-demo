@@ -18,6 +18,18 @@ export class DisplayComposer extends SceneComposer
     }
 
     /**
+     * Adds the object3D to the scene used by this composer
+     * @param {THREE.Object3D} object3D 
+     */
+    addToScene() {}
+
+    /**
+     * Removes the object3D from the scene used by this composer
+     * @param {THREE.Object3D} object3D
+     */
+    removeFromScene() {}
+
+    /**
      * Renders the scene
      * @param {Number} width width of frame which will be rendered
      * @param {Number} height height of frame which will be rendered
