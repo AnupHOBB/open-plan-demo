@@ -29,6 +29,15 @@ export class BloomComposer extends SceneComposer
     setup(camera) { this.composer.insertPass(new RenderPass(this.scene, camera), 0) }
 
     /**
+     * Removes all object3D from the scene
+     */
+    clearScene() 
+    { 
+        this.scene.clear()
+        this.scene.add(new THREE.HemisphereLight(0xffffff, 0xffffff, 1)) 
+    }
+
+    /**
      * Sets the strength for overall bloom
      * @param {Number} strength bloom strength value 
      */

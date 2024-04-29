@@ -13,7 +13,7 @@ export { InputManager } from './InputManager.js'
 export { AmbientLight, DirectLight, PointLight, SpotLight } from './Light.js'
 export { StaticModel, MeshModel, InstancedModel } from './Models.js'
 export { OrbitControl } from './OrbitControl.js'
-export { SceneObject, SceneObjectGroup, SceneManager } from './core/SceneManager.js'
+export { SceneObject, SceneManager } from './core/SceneManager.js'
 export { DebugUI } from './DebugUI.js'
 export { AnistropicLightingMaterial } from './materials/AnistropicLightingMaterial.js'
 

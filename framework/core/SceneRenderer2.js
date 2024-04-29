@@ -21,6 +21,7 @@ export class SceneRenderer
         this.renderer.setPixelRatio(window.devicePixelRatio)
         this.composers = [new SSAOComposer(this.renderer), new BloomComposer(this.renderer), new DisplayComposer(this.renderer)]
         this.activeCamera = undefined
+        this.sceneObjects = new Map()
     }
 
     /**
@@ -108,25 +109,27 @@ export class SceneRenderer
     }
 
     /**
-     * Adds the threejs object into the scene
-     * @param {THREE.Object3D} object3D name of the object3D that will be added
+     * Adds the sceneObject into the scene object map
+     * @param {SceneObject} sceneObject sceneObject that needs to be added to the scene object map
      */
-    addToScene(object3D)
+    addToScene(sceneObject)
     {
-        let composer = this._getComposer('SSAOComposer')
+        this.sceneObjects.set(sceneObject.name, sceneObject)
+        /* let composer = this._getComposer('SSAOComposer')
         if (composer != undefined) 
-            composer.addToScene(object3D)
+            composer.addToScene(object3D) */
     }
 
     /**
-     * Removes the threejs object from the scene
-     * @param {THREE.Object3D} object3D name of the object3D that will be removed
+     * Removes the sceneObject from the scene
+     * @param {String} name name of the sceneObject that is to be removed
      */
-    removeFromScene(object3D)
+    removeFromScene(name)
     {
-        let composer = this._getComposer('SSAOComposer')
+        this.sceneObjects.delete(name)
+        /* let composer = this._getComposer('SSAOComposer')
         if (composer != undefined) 
-            composer.removeFromScene(object3D)
+            composer.removeFromScene(object3D) */
     }
 
         /**
@@ -191,6 +194,16 @@ export class SceneRenderer
             let renderedTexture
             for (let composer of this.composers)
             {    
+                composer.clearScene()
+                let names = this.sceneObjects.keys()
+                for (let name of names)
+                {
+                    let sceneObject = this.sceneObjects.get(name)
+                    if (composer.name == 'BloomComposer' && sceneObject.isLuminant())   
+                        composer.addToScene(sceneObject.getObject3D())
+                    if (composer.name == 'SSAOComposer' && !sceneObject.isLuminant())  
+                        composer.addToScene(sceneObject.getObject3D())
+                }
                 composer.render(this.width, this.height, renderedTexture)
                 renderedTexture = composer.getRenderedScene()
             }
@@ -226,15 +239,6 @@ export class SceneRenderer
 }
 
 /**
-////////////////////////////////////////BLOOM/////////////////////////////////////////////
- *     setBloomPercentage(percent) { this.sceneRenderer.setBloomPercentage(percent) }
-
-    setBloomIntensity(intensity) { this.sceneRenderer.setBloomIntensity(intensity) }
-
-    setBloomThreshold(threshold) { this.sceneRenderer.setBloomThreshold(threshold) }
-
-    setBloomRadius(radius) { this.sceneRenderer.setBloomRadius(radius) }
-////////////////////////////////////////BLOOM/////////////////////////////////////////////
 ////////////////////////////////////Anti Aliasing////////////////////////////////////////    
 
     enableFXAA(enable) { this.sceneRenderer.enableFXAA(enable) }

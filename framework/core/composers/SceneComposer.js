@@ -31,6 +31,11 @@ export class SceneComposer
     removeFromScene(object3D) { this.scene.remove(object3D) }
 
     /**
+     * Removes all object3D from the scene
+     */
+    clearScene() { this.scene.clear() }
+
+    /**
      * Returns the render target as texture
      * @returns {THREE.Texture} the texture that has the rendered scene
      */

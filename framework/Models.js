@@ -100,7 +100,7 @@ export class MeshModel extends SceneObject
         super(name, model)
         this.meshMap = new Map()
         this.boneMap = new Map()
-        Misc.postOrderTraversal(this.scene, mesh => {
+        Misc.postOrderTraversal(this.object3D, mesh => {
             this.meshMap.set(mesh.name, mesh)
             if (mesh.material != undefined)
             {
@@ -116,7 +116,7 @@ export class MeshModel extends SceneObject
                     mesh.material.transparent = true
             }
         })
-        Misc.postOrderTraversal(this.scene, mesh => {
+        Misc.postOrderTraversal(this.object3D, mesh => {
             if (mesh != undefined && mesh.isBone)
                 this.boneMap.set(mesh.name, mesh)
         })
@@ -126,7 +126,7 @@ export class MeshModel extends SceneObject
             this.mixer = null
             if (clip != null && clip != undefined)
             {
-                this.mixer = new THREE.AnimationMixer(this.scene)
+                this.mixer = new THREE.AnimationMixer(this.object3D)
                 this.mixer.clipAction(clip).play()
             }
         }
@@ -144,7 +144,7 @@ export class MeshModel extends SceneObject
 
     setRotationFromAxisAngleFor(axis, angleInRadians, names)
     {
-        Misc.postOrderTraversal(this.scene, mesh => {
+        Misc.postOrderTraversal(this.object3D, mesh => {
             if (mesh.material != undefined)
             {    
                 for (let name of names)
@@ -167,9 +167,9 @@ export class MeshModel extends SceneObject
      */
     addRotation(dx, dy, dz) 
     { 
-        this.scene.rotation.x += dx 
-        this.scene.rotation.y += dy
-        this.scene.rotation.z += dz 
+        this.object3D.rotation.x += dx 
+        this.object3D.rotation.y += dy
+        this.object3D.rotation.z += dz 
     }
 
     /**
@@ -178,7 +178,7 @@ export class MeshModel extends SceneObject
      */
     addRotationInEnvMap(delta) 
     {
-        Misc.postOrderTraversal(this.scene, mesh => {
+        Misc.postOrderTraversal(this.object3D, mesh => {
             if (mesh.material != undefined)
             {
                 let map = mesh.material.envMap
@@ -212,7 +212,7 @@ export class MeshModel extends SceneObject
      */
     applyMaterial(material)
     {
-        Misc.postOrderTraversal(this.scene, mesh => {
+        Misc.postOrderTraversal(this.object3D, mesh => {
             if (mesh.material != undefined)
                 mesh.material = material
         }) 
@@ -224,7 +224,7 @@ export class MeshModel extends SceneObject
      */
     applyMaterialOn(material, names)
     {
-        Misc.postOrderTraversal(this.scene, mesh => {
+        Misc.postOrderTraversal(this.object3D, mesh => {
             if (mesh.material != undefined)
             {    
                 for (let name of names)
@@ -241,7 +241,7 @@ export class MeshModel extends SceneObject
 
     applyMap(materialName, mapType, map) 
     { 
-        Misc.postOrderTraversal(this.scene, mesh => {
+        Misc.postOrderTraversal(this.object3D, mesh => {
             if (mesh.material != undefined && mesh.material.name == materialName && mesh.material[mapType] != undefined)    
                 mesh.material[mapType] = map
         }) 
@@ -253,7 +253,7 @@ export class MeshModel extends SceneObject
     */
     applyTexture(texture) 
     { 
-        Misc.postOrderTraversal(this.scene, mesh => {
+        Misc.postOrderTraversal(this.object3D, mesh => {
             if (mesh.material != undefined)
                 mesh.material.map = texture 
         }) 
@@ -268,7 +268,7 @@ export class MeshModel extends SceneObject
     { 
         if (names.length > 0)
         {
-            Misc.postOrderTraversal(this.scene, mesh => {
+            Misc.postOrderTraversal(this.object3D, mesh => {
                 if (mesh.material != undefined)
                 {
                     for (let name of names)
@@ -293,7 +293,7 @@ export class MeshModel extends SceneObject
     */
     applyColor(color) 
     { 
-        Misc.postOrderTraversal(this.scene, mesh => {
+        Misc.postOrderTraversal(this.object3D, mesh => {
             if (mesh.material != undefined)
                 mesh.material.color = color 
         }) 
@@ -306,7 +306,7 @@ export class MeshModel extends SceneObject
     */
     applyEnvmap(envmap, envMapIntensity)
     {
-        Misc.postOrderTraversal(this.scene, mesh => {
+        Misc.postOrderTraversal(this.object3D, mesh => {
             if (mesh.material != undefined && mesh.material.isMeshStandardMaterial != undefined && mesh.material.isMeshStandardMaterial)
             {    
                 mesh.material.envMap = envmap
@@ -323,7 +323,7 @@ export class MeshModel extends SceneObject
     */
     applyNormalmap(normalMap)
     {
-        Misc.postOrderTraversal(this.scene, mesh => {
+        Misc.postOrderTraversal(this.object3D, mesh => {
             if (mesh.material != undefined && mesh.material.isMeshStandardMaterial != undefined && mesh.material.isMeshStandardMaterial)
             {    
                 mesh.material.normalMap = normalMap
@@ -334,7 +334,7 @@ export class MeshModel extends SceneObject
 
     applyNormalmapOn(normalMap, names)
     {
-        Misc.postOrderTraversal(this.scene, mesh => {
+        Misc.postOrderTraversal(this.object3D, mesh => {
             if (mesh.material != undefined && mesh.material.isMeshStandardMaterial != undefined && mesh.material.isMeshStandardMaterial)
             {    
                 for (let name of names)
@@ -352,7 +352,7 @@ export class MeshModel extends SceneObject
 
     rotateNormalMapOf(angleInRadians, names)
     {
-        Misc.postOrderTraversal(this.scene, mesh => {
+        Misc.postOrderTraversal(this.object3D, mesh => {
             if (mesh.material != undefined && mesh.material.isMeshStandardMaterial != undefined && mesh.material.isMeshStandardMaterial)
             {    
                 for (let name of names)
@@ -371,7 +371,7 @@ export class MeshModel extends SceneObject
 
     setTextureAnisotropy(value)
     {
-        Misc.postOrderTraversal(this.scene, mesh => {
+        Misc.postOrderTraversal(this.object3D, mesh => {
             if (mesh.material != undefined)
                 mesh.material.map.anisotropy = value
         })
@@ -379,7 +379,7 @@ export class MeshModel extends SceneObject
 
     setRoughness(roughness)
     {
-        Misc.postOrderTraversal(this.scene, mesh => {
+        Misc.postOrderTraversal(this.object3D, mesh => {
             if (mesh.material != undefined)
                 mesh.material.roughness = roughness
         })
@@ -389,7 +389,7 @@ export class MeshModel extends SceneObject
     { 
         if (names.length > 0)
         {
-            Misc.postOrderTraversal(this.scene, mesh => {
+            Misc.postOrderTraversal(this.object3D, mesh => {
                 if (mesh.material != undefined)
                 {
                     for (let name of names)
@@ -408,7 +408,7 @@ export class MeshModel extends SceneObject
 
     setMetalness(metalness)
     {
-        Misc.postOrderTraversal(this.scene, mesh => {
+        Misc.postOrderTraversal(this.object3D, mesh => {
             if (mesh.material != undefined)
                 mesh.material.metalness = metalness
         })
@@ -418,7 +418,7 @@ export class MeshModel extends SceneObject
     { 
         if (names.length > 0)
         {
-            Misc.postOrderTraversal(this.scene, mesh => {
+            Misc.postOrderTraversal(this.object3D, mesh => {
                 if (mesh.material != undefined)
                 {
                     for (let name of names)
@@ -437,7 +437,7 @@ export class MeshModel extends SceneObject
 
     setSheen(sheen)
     {
-        Misc.postOrderTraversal(this.scene, mesh => {
+        Misc.postOrderTraversal(this.object3D, mesh => {
             if (mesh.material != undefined)
                 mesh.material.sheen = sheen
         })
@@ -445,7 +445,7 @@ export class MeshModel extends SceneObject
 
     setVisibility(visible)
     {
-        Misc.postOrderTraversal(this.scene, mesh => {
+        Misc.postOrderTraversal(this.object3D, mesh => {
             if (mesh.material != undefined)
                 mesh.material.visible = visible
         })
@@ -453,7 +453,7 @@ export class MeshModel extends SceneObject
 
     setOpacity(materialName, opacity) 
     { 
-        Misc.postOrderTraversal(this.scene, mesh => {
+        Misc.postOrderTraversal(this.object3D, mesh => {
             if (mesh.material != undefined && mesh.material.name == materialName && mesh.material['opacity'] != undefined)
             {    
                 mesh.material.opacity = opacity
@@ -521,7 +521,7 @@ export class InstancedModel extends MeshModel
         this._positions = new Array(instanceCount).fill(new THREE.Vector3(), 0, instanceCount)
         this._rotations = new Array(instanceCount).fill(new THREE.Quaternion(), 0, instanceCount)
         this._scales = new Array(instanceCount).fill(new THREE.Vector3(1, 1, 1), 0, instanceCount)
-        this._traverseMeshTree(this.scene, (mesh, modelMatrix) => 
+        this._traverseMeshTree(this.object3D, (mesh, modelMatrix) => 
         {
             if (mesh.isMesh != undefined && mesh.isMesh)
             {

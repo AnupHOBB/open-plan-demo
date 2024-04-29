@@ -70,12 +70,17 @@ window.onload = () =>
         let comp = new CONFIGURATOR2.TopCabinet()
         //let comp = new CONFIGURATOR2.BottomCabinet()
         comp.registerInScene(sceneManager)
-        setTimeout(()=>{
+        /* setTimeout(()=>{
             comp.setHeight(2)
             comp.setWidth(2)
             comp.setDepth(2)
             console.log('dimensions changed')
         }, 5000)
+ */
+        /* setInterval(()=>{
+            comp.component.setLuminance(!comp.component.isLuminant())
+        }, 10) */
+
     })
 }
 

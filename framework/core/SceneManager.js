@@ -9,34 +9,25 @@ export class SceneObject
 {
     /**
      * @param {String} name name of the object which is used in sending or receiving message
-     * @param {THREE.Object3D} model threejs object3D instance
+     * @param {THREE.Object3D} object3D threejs object3D instance
      */
-    constructor(name, model) 
+    constructor(name, object3D) 
     { 
         this.name = name
-        this.scene = new THREE.Group()
-        if (model != undefined)
+        this.object3D = new THREE.Group()
+        if (object3D != undefined)
         {
-            if (model.isObject3D)
-                this.scene = model
-            else if (model.scene.isObject3D)
-                this.scene = model.scene
+            if (object3D.isObject3D)
+                this.object3D = object3D
+            else if (object3D.scene.isObject3D)
+                this.object3D = object3D.scene
         }
         this.children = []
         this.childrenObject3D = []
-        this.drawables = [{object: this.scene, isRayCastable: false}]
         this.luminance = false
     }
 
-    enableRayCastingOnTriMesh(enable) { this.drawables[0].isRayCastable = enable }
-
-    /**
-     * Adds extra threejs object for rendering as part of this scene object
-     * @param {THREE.Object3D} drawableObject threejs object to be displayed
-     * @param {Boolean} isRayCastable boolean value indicating whether the mesh should participate in ray casting
-     */
-    addDrawable(drawableObject, isRayCastable) { this.drawables.push({object: drawableObject, isRayCastable: isRayCastable}) }
-    
+    enableRayCastingOnTriMesh(enable) { this.drawables[0].isRayCastable = enable }    
 
     /**
      * Sets the position of the mesh in world space
@@ -44,7 +35,7 @@ export class SceneObject
      * @param {Number} y y-coordinate in world space
      * @param {Number} z z-coordinate in world space 
      */
-    setPosition(x, y, z) { this.scene.position.set(x, y, z) }
+    setPosition(x, y, z) { this.object3D.position.set(x, y, z) }
 
     /**
      * Sets the rotation of the mesh in world space using euler values
@@ -52,58 +43,71 @@ export class SceneObject
      * @param {Number} y yaw in world space in radians
      * @param {Number} z roll in world space in radians 
      */
-    setRotation(x, y, z) { this.scene.rotation.set(x, y, z) }
+    setRotation(x, y, z) { this.object3D.rotation.set(x, y, z) }
     
     /**
      * Sets the rotation of the mesh in world space using axis and angle
      * @param {Vector3} axis axis of rotation
      * @param {Number} angle angle of rotation in radians
      */
-    setRotationFromAxisAngle(axis, angle) { this.scene.setRotationFromAxisAngle(axis, angle) }
+    setRotationFromAxisAngle(axis, angle) { this.object3D.setRotationFromAxisAngle(axis, angle) }
 
     /**
      * Sets the rotation order for the model. Values should be one of the following in string :-
      * XYZ, ZXY, YZX, XZY, YXZ, ZYX
      * @param {String} order the rotation order in string
      */
-    setRotationOrder(order) { this.scene.rotation.order = order }
+    setRotationOrder(order) { this.object3D.rotation.order = order }
 
     /**
     * Returns world space position of the mesh
     * @returns {THREE.Vector3} world space position of mesh 
     */
-    getPosition() { return this.scene.position }
+    getPosition() { return this.object3D.position }
 
-    getRotation() { return this.scene.rotation }
+    getRotation() { return this.object3D.rotation }
+
+    
+    /**
+     * Returns an array of attached models
+     * @returns {Array} array of attached children models
+     */
+    getAttachedModels() { return this.children }
+
+    setLuminance(luminant) { this.luminance = luminant }
+
+    isLuminant() { return this.luminance }
+
+    getObject3D() { return this.object3D }
 
     /**
      * Attaches another scene object oject to this one
-     * @param {SceneObject} model 
+     * @param {SceneObject} sceneObject 
      */
-    attach(model)
+    attach(sceneObject)
     {
-        if (model != undefined)
+        if (sceneObject != undefined)
         {
-            model.scene.parent = this.scene
-            this.scene.children.push(model.scene)
-            this.children.push(model)
+            sceneObject.object3D.parent = this.object3D
+            this.object3D.children.push(sceneObject.object3D)
+            this.children.push(sceneObject)
         }
     }
 
     /**
      * Detaches model oject from this one
-     * @param {SceneObject} model 
+     * @param {SceneObject} sceneObject 
      */
-    detach(model)
+    detach(sceneObject)
     {
-        if (model != undefined)
+        if (sceneObject != undefined)
         {
-            let i = this.scene.children.indexOf(model.scene)
+            let i = this.object3D.children.indexOf(sceneObject.object3D)
             if (i > -1)    
             {    
-                this.scene.children.splice(i, 1)
-                model.scene.parent = null
-                let j = this.children.indexOf(model)
+                this.object3D.children.splice(i, 1)
+                sceneObject.object3D.parent = null
+                let j = this.children.indexOf(sceneObject)
                 if (j > -1)
                     this.children.splice(j, 1)
             }
@@ -118,8 +122,8 @@ export class SceneObject
     {
         if (object3D != undefined)
         {
-            object3D.parent = this.scene
-            this.scene.children.push(object3D)
+            object3D.parent = this.object3D
+            this.object3D.children.push(object3D)
             this.childrenObject3D.push(object3D)
         }
     }
@@ -132,10 +136,10 @@ export class SceneObject
     {
         if (object3D != undefined)
         {
-            let i = this.scene.children.indexOf(object3D)
+            let i = this.object3D.children.indexOf(object3D)
             if (i > -1)    
             {    
-                this.scene.children.splice(i, 1)
+                this.object3D.children.splice(i, 1)
                 object3D.parent = null
                 let j = this.childrenObject3D.indexOf(object3D)
                 if (j > -1)
@@ -143,16 +147,6 @@ export class SceneObject
             }
         }
     }
-
-    /**
-     * Returns an array of attached models
-     * @returns {Array} array of attached children models
-     */
-    getAttachedModels() { return this.children }
-
-    setLuminance(luminant) { this.luminance = luminant }
-
-    isLuminant() { return this.luminance }
 
     /**
      * Called by SceneManager when there is a message for this object posted by any other object registered in SceneManager.
@@ -185,128 +179,6 @@ export class SceneObject
      * @returns {Boolean}
      */
     isReady() { return true }
-
-    /**
-     * Returns the list of drawable threejs meshes
-     * @returns {Array} array of threejs mesh objects
-     */
-    getDrawables() { return this.drawables }
-
-    /**
-     * Returns the list of lights attached with this object
-     * @returns {Array} array of threejs lights
-     */
-    getLights() { return [] }
-
-    /**
-     * Used for notifying the SceneManager if this object should be included in raycasting.
-     * @returns {Boolean}
-     */
-    isDrawable() { return false }
-}
-
-/**
- * Represents group of sceneobjects
- */
-export class SceneObjectGroup extends SceneObject
-{
-    /**
-     * @param {String} name name of the object which is used in sending or receiving message
-     */
-    constructor(name) 
-    { 
-        super(name)
-        this.sceneObjects = []
-        this.drawables = []
-        this.lights = []
-    }
-
-    /**
-     * Adds the scene object as part of the group
-     * @param {SceneObject} sceneObject sceneObject that needs to be added as part of the group
-     */
-    add(sceneObject) 
-    { 
-        this.sceneObjects.push(sceneObject)
-        let sceneObjectDrawables = sceneObject.getDrawables()
-        let sceneObjectLights = sceneObject.getLights()
-        for (let sceneObjectDrawable of sceneObjectDrawables)
-            this.drawables.push(sceneObjectDrawable)
-        for (let sceneObjectLight of sceneObjectLights)
-            this.lights.push(sceneObjectLight)
-    }
-
-    /**
-     * Called by SceneManager when there is a message for this object posted by any other object registered in SceneManager.
-     * @param {SceneManager} sceneManager the SceneManager object
-     * @param {String} senderName name of the object who posted the message
-     * @param {any} data any object sent as part of the message
-     */
-    onMessage(sceneManager, senderName, data) 
-    {
-        for (let sceneObject of this.sceneObjects)
-            sceneObject.onMessage(sceneManager, senderName, data) 
-    }
-
-    /**
-     * Called by SceneManager as soon as the object gets registered in SceneManager.
-     * @param {SceneManager} sceneManager the SceneManager object
-     */
-    onSceneStart(sceneManager) 
-    {
-        for (let sceneObject of this.sceneObjects)
-            sceneObject.onSceneStart(sceneManager) 
-    }
-
-    /**
-     * Called by SceneManager every frame.
-     * @param {SceneManager} sceneManager the SceneManager object
-     */
-    onSceneRender(sceneManager) 
-    {
-        for (let sceneObject of this.sceneObjects)
-            sceneObject.onSceneRender(sceneManager) 
-    }
-
-    /**
-     * Called by SceneManager as soon as the object gets unregistered in SceneManager.
-     * @param {SceneManager} sceneManager the SceneManager object
-     */
-    onSceneEnd(sceneManager) 
-    {
-        for (let sceneObject of this.sceneObjects)
-            sceneObject.onSceneEnd(sceneManager) 
-    }
-
-    /**
-     * Used for notifying the SceneManager if this object is ready to be included in scene.
-     * @returns {Boolean}
-     */
-    isReady() 
-    {
-        let ready = true
-        for (let sceneObject of this.sceneObjects)
-            ready &&= sceneObject.isReady()
-        return ready 
-    }
-
-    /**
-     * Returns the list of drawable threejs meshes
-     * @returns {Array} array of threejs mesh objects
-     */
-    getDrawables() { return this.drawables }
-
-    /**
-     * Returns the list of lights attached with this object
-     * @returns {Array} array of threejs lights
-     */
-    getLights() { return this.lights }
-
-    /**
-     * Used for notifying the SceneManager if this object should be included in raycasting.
-     * @returns {Boolean}
-     */
-    isDrawable() { return true }
 }
 
 /**
@@ -346,11 +218,11 @@ export class SceneManager
     register(sceneObject)
     {
         this.sceneObjectMap.set(sceneObject.name, sceneObject)
-        if (sceneObject.isDrawable() && !sceneObject.isReady())
+        if (!sceneObject.isReady())
             this.inactiveObjNameMap.set(sceneObject.name, null)
         else if (sceneObject.isReady())
         {
-            this._addToScene(sceneObject)     
+            this.sceneRenderer.addToScene(sceneObject)  
             sceneObject.onSceneStart(this)
         }
         this._checkMessages(sceneObject)
@@ -358,15 +230,14 @@ export class SceneManager
 
     /**
      * Unregisters the SceneObject into SceneManager.
-     * @param {String} name name of the sceneObject that is registered in the scene manager.
+     * @param {String} name name of the sceneObject that is to be unregistered from the scene manager.
      */
     unregister(name)
     {
         let sceneObject = this.sceneObjectMap.get(name)
         if (sceneObject != undefined)
         {
-
-            this._removeFromScene(sceneObject)
+            this.sceneRenderer.removeFromScene(name)
             sceneObject.onSceneEnd(this)
             this.sceneObjectMap.delete(name)
         }
@@ -669,49 +540,5 @@ export class SceneManager
                 } 
             }
         }
-    }
-
-    /**
-     * Adds a threejs object into the threejs scene within SceneCore and registers that same object as ray castable if rayCastable value is true.
-     * @param {SceneObject} sceneObject instance of SceneObject class
-     */
-    _addToScene(sceneObject) 
-    { 
-        let drawables = sceneObject.getDrawables()
-        let lights = sceneObject.getLights()
-        for (let drawable of drawables)
-        {
-            this.sceneRenderer.addToBloomScene(drawable.object)
-            if (sceneObject.isLuminant())
-                this.sceneRenderer.addToBloomScene(drawable.object)
-            else
-                this.sceneRenderer.addToScene(drawable.object)
-            if (drawable.isRayCastable)
-                this.raycast.add(sceneObject.name, drawable.object)
-        }
-        for (let light of lights)  
-            this.sceneRenderer.addToScene(light.object, false)
-
-    }
-
-    /**
-     * Removes a threejs object from the threejs scene within SceneCore
-     * @param {SceneObject} sceneObject instance of SceneObject class
-     */
-    _removeFromScene(sceneObject)
-    {
-        let drawables = sceneObject.getDrawables()
-        let lights = sceneObject.getLights()
-        for (let drawable of drawables)
-        {
-            if (sceneObject.isLuminant())
-                this.sceneRenderer.removeFromBloomScene(drawable.object)
-            else
-                this.sceneRenderer.removeFromScene(drawable.object)
-            if (drawable.isRayCastable)
-                this.raycast.remove(sceneObject.name)
-        }
-        for (let light of lights)
-            this.sceneRenderer.removeFromScene(light.object)
     }
 }

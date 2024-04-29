@@ -13,23 +13,13 @@ export class AmbientLight extends SceneObject
      * @param {THREE.Color} color color of the light
      * @param {Number} intensity intensity of the light
      */
-    constructor(name, color, intensity) 
-    {
-        super(name)
-        this.light = new THREE.AmbientLight(color, intensity)
-    }
+    constructor(name, color, intensity) { super(name, new THREE.AmbientLight(color, intensity)) }
 
     /**
      * Sets the light intensity
      * @param {Number} intensity the intensity to be applied 
      */
-    setIntensity(intensity) { this.light.intensity = intensity }
-
-    /**
-     * Returns the list of lights attached with this object
-     * @returns {Array} array of threejs lights
-     */
-    getLights() { return [{object: this.light, isRayCastable: false}] }
+    setIntensity(intensity) { this.object3D.intensity = intensity }
 
     /**
      * Used for notifying the SceneManager if this object is drawable in screen.
@@ -39,9 +29,8 @@ export class AmbientLight extends SceneObject
 
     /**
      * Called by SceneManager as soon as the object gets unregistered in SceneManager.
-     * @param {SceneManager} sceneManager the SceneManager object
      */
-    onSceneEnd(sceneManager) { this.light.dispose() }
+    onSceneEnd() { this.object3D.dispose() }
 }
 
 /**
@@ -56,13 +45,10 @@ export class DirectLight extends SceneObject
      */
     constructor(name, color, intensity) 
     { 
-        super(name)
-        this.light = new THREE.DirectionalLight(color, intensity)
+        super(name, new THREE.DirectionalLight(color, intensity))
         this.target = new THREE.Object3D()
-        this.light.target = this.target
-        this.drawables = []
+        this.object3D.target = this.target
         this.lensFlare = new Lensflare()
-        this.drawables.push({object: this.target, isRayCastable: false})
     }
 
     /**
@@ -72,34 +58,27 @@ export class DirectLight extends SceneObject
      */
     enableShadows(enable, shouldUpdateEveryFrame)
     {
-        this.light.castShadow = enable
+        this.object3D.castShadow = enable
         if (enable)
         {
-            this.light.shadow.mapSize.width = 8192
-            this.light.shadow.mapSize.height = 4096
-            this.light.shadow.camera.near = 0.1
-            this.light.shadow.camera.far = 200
-            this.light.shadow.camera.left = -20
-            this.light.shadow.camera.right = 20
-            this.light.shadow.camera.bottom = -20
-            this.light.shadow.camera.top = 20
-            this.light.shadow.bias = -0.0005
-            this.light.shadow.autoUpdate = shouldUpdateEveryFrame
-            this.light.shadow.needsUpdate = true
+            this.object3D.shadow.mapSize.width = 8192
+            this.object3D.shadow.mapSize.height = 4096
+            this.object3D.shadow.camera.near = 0.1
+            this.object3D.shadow.camera.far = 200
+            this.object3D.shadow.camera.left = -20
+            this.object3D.shadow.camera.right = 20
+            this.object3D.shadow.camera.bottom = -20
+            this.object3D.shadow.camera.top = 20
+            this.object3D.shadow.bias = -0.0005
+            this.object3D.shadow.autoUpdate = shouldUpdateEveryFrame
+            this.object3D.shadow.needsUpdate = true
         }
     }
 
     /**
      * Adds the camera helper threejs object in drawables array to have it rendered on screen
      */
-    enableCameraHelper() { this.drawables.push({object: new THREE.CameraHelper(this.light.shadow.camera), isRayCastable: false}) }
-
-    /**
-     * Adds extra threejs object for rendering as part of this scene object
-     * @param {THREE.Object3D} drawableObject threejs object to be displayed
-     * @param {Boolean} isRayCastable boolean value indicating whether the mesh should participate in ray casting
-     */
-    addDrawable(drawableObject, isRayCastable) { this.drawables.push({object: drawableObject, isRayCastable: isRayCastable}) }
+    enableCameraHelper() { this.attachObject3D(new THREE.CameraHelper(this.object3D.shadow.camera)) }
 
     /**
      * Adds the lens flare threejs object in threejs light object to have it rendered on screen
@@ -108,7 +87,7 @@ export class DirectLight extends SceneObject
     addLensFlare(texture)
     {
         this.lensFlare.addElement(new LensflareElement(texture, 512, 0.4))
-        this.light.add(this.lensFlare)
+        this.object3D.add(this.lensFlare)
     }
 
     /**
@@ -117,13 +96,13 @@ export class DirectLight extends SceneObject
      * @param {Number} y y-coordinate in world space
      * @param {Number} z z-coordinate in world space 
      */
-    setPosition(x, y, z) { this.light.position.set(x, y, z) }
+    setPosition(x, y, z) { this.object3D.position.set(x, y, z) }
 
-    getPosition() { return this.light.position }
+    getPosition() { return this.object3D.position }
 
-    setRotation(x, y, z) { this.light.setRotationFromEuler(new THREE.Euler(x, y, z)) }
+    setRotation(x, y, z) { this.object3D.setRotationFromEuler(new THREE.Euler(x, y, z)) }
 
-    getRotation() { return this.light.rotation }
+    getRotation() { return this.object3D.rotation }
 
     /**
      * Sets the position where the light is supposed to look at
@@ -131,41 +110,22 @@ export class DirectLight extends SceneObject
      * @param {Number} y y-coordinate in world space
      * @param {Number} z z-coordinate in world space 
      */
-    setLookAt(x, y, z) { this.light.target.position.set(x, y, z) }
+    setLookAt(x, y, z) { this.object3D.target.position.set(x, y, z) }
 
-    getLookAt(x, y, z) { return this.light.target.position }
+    getLookAt(x, y, z) { return this.object3D.target.position }
 
     /**
      * Sets the light intensity
      * @param {Number} intensity the intensity to be applied 
      */
-    setIntensity(intensity) { this.light.intensity = intensity }
-
-    /**
-     * Returns the list of drawable threejs meshes
-     * @returns {Array} array of threejs mesh objects
-     */
-    getDrawables() { return this.drawables }
-
-    /**
-     * Returns the list of lights attached with this object
-     * @returns {Array} array of threejs lights
-     */
-    getLights() { return [{object: this.light, isRayCastable: false}, ] }
-
-    /**
-     * Used for notifying the SceneManager if this object is drawable in screen.
-     * @returns {Boolean} drawable status of object 
-     */
-    isDrawable() { return true }
+    setIntensity(intensity) { this.object3D.intensity = intensity }
 
     /**
      * Called by SceneManager as soon as the object gets unregistered in SceneManager.
-     * @param {SceneManager} sceneManager the SceneManager object
      */
-    onSceneEnd(sceneManager) 
+    onSceneEnd() 
     { 
-        this.light.dispose()
+        this.object3D.dispose()
         if (this.lensFlare != null)
             this.lensFlare.dispose()
     }
@@ -182,12 +142,7 @@ export class PointLight extends SceneObject
      * @param {Number} intensity intensity of the light
      * @param {Number} distance maximum range of the light
      */
-    constructor(name, color, intensity, distance)
-    {
-        super(name)
-        this.light = new THREE.PointLight(color, intensity, distance)
-        this.drawables = []
-    }
+    constructor(name, color, intensity, distance) { super(name, new THREE.PointLight(color, intensity, distance)) }
 
     /**
      * Enables shadows
@@ -196,29 +151,22 @@ export class PointLight extends SceneObject
      */
     enableShadows(enable, shouldUpdateEveryFrame)
     {
-        this.light.castShadow = enable
+        this.object3D.castShadow = enable
         if (enable)
         {
-            this.light.shadow.mapSize.width = 1024
-            this.light.shadow.mapSize.height = 1024
-            this.light.shadow.camera.near = 0.1
-            this.light.shadow.camera.far = 100
-            this.light.shadow.camera.left = -5
-            this.light.shadow.camera.right = 5
-            this.light.shadow.camera.bottom = -5
-            this.light.shadow.camera.top = 5
-            this.light.shadow.bias = -0.0005
-            this.light.shadow.autoUpdate = shouldUpdateEveryFrame
-            this.light.shadow.needsUpdate = true
+            this.object3D.shadow.mapSize.width = 1024
+            this.object3D.shadow.mapSize.height = 1024
+            this.object3D.shadow.camera.near = 0.1
+            this.object3D.shadow.camera.far = 100
+            this.object3D.shadow.camera.left = -5
+            this.object3D.shadow.camera.right = 5
+            this.object3D.shadow.camera.bottom = -5
+            this.object3D.shadow.camera.top = 5
+            this.object3D.shadow.bias = -0.0005
+            this.object3D.shadow.autoUpdate = shouldUpdateEveryFrame
+            this.object3D.shadow.needsUpdate = true
         }
     }
-
-    /**
-     * Adds extra threejs object for rendering as part of this scene object
-     * @param {THREE.Object3D} drawableObject threejs object to be displayed
-     * @param {Boolean} isRayCastable boolean value indicating whether the mesh should participate in ray casting
-     */
-    addDrawable(drawableObject, isRayCastable) { this.drawables.push({object: drawableObject, isRayCastable: isRayCastable}) }
 
     /**
      * Sets the position of the light in world space
@@ -226,37 +174,18 @@ export class PointLight extends SceneObject
      * @param {Number} y y-coordinate in world space
      * @param {Number} z z-coordinate in world space 
      */
-    setPosition(x, y, z) { this.light.position.set(x, y, z) }
+    setPosition(x, y, z) { this.object3D.position.set(x, y, z) }
 
     /**
      * Sets the light intensity
      * @param {Number} intensity the intensity to be applied 
      */
-    setIntensity(intensity) { this.light.intensity = intensity }
-
-    /**
-     * Returns the list of drawable threejs meshes
-     * @returns {Array} array of threejs mesh objects
-     */
-    getDrawables() { return this.drawables }
-
-    /**
-     * Returns the list of lights attached with this object
-     * @returns {Array} array of threejs lights
-     */
-    getLights() { return [{object: this.light, isRayCastable: false}] }
-
-    /**
-     * Used for notifying the SceneManager if this object is drawable in screen.
-     * @returns {Boolean} drawable status of camera
-     */
-    isDrawable() { return true }
+    setIntensity(intensity) { this.object3D.intensity = intensity }
     
     /**
      * Called by SceneManager as soon as the object gets unregistered in SceneManager.
-     * @param {SceneManager} sceneManager the SceneManager object
      */
-    onSceneEnd(sceneManager) { this.light.dispose() }
+    onSceneEnd() { this.object3D.dispose() }
 }
 
 /**
@@ -274,12 +203,9 @@ export class SpotLight extends SceneObject
      */
     constructor(name, color, intensity, distance, angle, penumbra)
     {
-        super(name)
-        this.light = new THREE.SpotLight(color, intensity, distance, angle, penumbra)
+        super(name, new THREE.SpotLight(color, intensity, distance, angle, penumbra))
         this.target = new THREE.Object3D()
-        this.light.target = this.target
-        this.drawables = []
-        this.drawables.push({object: this.target, isRayCastable: false})
+        this.object3D.target = this.target
     }
 
     /**
@@ -289,29 +215,22 @@ export class SpotLight extends SceneObject
      */
     enableShadows(enable, shouldUpdateEveryFrame)
     {
-        this.light.castShadow = enable
+        this.object3D.castShadow = enable
         if (enable)
         {
-            this.light.shadow.mapSize.width = 1024
-            this.light.shadow.mapSize.height = 1024
-            this.light.shadow.camera.near = 0.1
-            this.light.shadow.camera.far = 100
-            this.light.shadow.camera.left = -5
-            this.light.shadow.camera.right = 5
-            this.light.shadow.camera.bottom = -5
-            this.light.shadow.camera.top = 5
-            this.light.shadow.bias = -0.0005
-            this.light.shadow.autoUpdate = shouldUpdateEveryFrame
-            this.light.shadow.needsUpdate = true
+            this.object3D.shadow.mapSize.width = 1024
+            this.object3D.shadow.mapSize.height = 1024
+            this.object3D.shadow.camera.near = 0.1
+            this.object3D.shadow.camera.far = 100
+            this.object3D.shadow.camera.left = -5
+            this.object3D.shadow.camera.right = 5
+            this.object3D.shadow.camera.bottom = -5
+            this.object3D.shadow.camera.top = 5
+            this.object3D.shadow.bias = -0.0005
+            this.object3D.shadow.autoUpdate = shouldUpdateEveryFrame
+            this.object3D.shadow.needsUpdate = true
         }
     }
-
-    /**
-     * Adds extra threejs object for rendering as part of this scene object
-     * @param {THREE.Object3D} drawableObject threejs object to be displayed
-     * @param {Boolean} isRayCastable boolean value indicating whether the mesh should participate in ray casting
-     */
-    addDrawable(drawableObject, isRayCastable) { this.drawables.push({object: drawableObject, isRayCastable: isRayCastable}) }
 
     /**
      * Sets the position of the light in world space
@@ -319,7 +238,7 @@ export class SpotLight extends SceneObject
      * @param {Number} y y-coordinate in world space
      * @param {Number} z z-coordinate in world space 
      */
-    setPosition(x, y, z) { this.light.position.set(x, y, z) }
+    setPosition(x, y, z) { this.object3D.position.set(x, y, z) }
 
     /**
      * Sets the position where the light is supposed to look at
@@ -327,35 +246,16 @@ export class SpotLight extends SceneObject
      * @param {Number} y y-coordinate in world space
      * @param {Number} z z-coordinate in world space 
      */
-    setLookAt(x, y, z) { this.light.target.position.set(x, y, z) }
+    setLookAt(x, y, z) { this.object3D.target.position.set(x, y, z) }
 
     /**
      * Sets the light intensity
      * @param {Number} intensity the intensity to be applied 
      */
-    setIntensity(intensity) { this.light.intensity = intensity }
-
-    /**
-     * Returns the list of drawable threejs meshes
-     * @returns {Array} array of threejs mesh objects
-     */
-    getDrawables() { return this.drawables }
-
-    /**
-     * Returns the list of lights attached with this object
-     * @returns {Array} array of threejs lights
-     */
-    getLights() { return [{object: this.light, isRayCastable: false}] }
-
-    /**
-     * Used for notifying the SceneManager if this object is drawable in screen.
-     * @returns {Boolean} drawable status of camera
-     */
-    isDrawable() { return true }
+    setIntensity(intensity) { this.object3D.intensity = intensity }
     
     /**
      * Called by SceneManager as soon as the object gets unregistered in SceneManager.
-     * @param {SceneManager} sceneManager the SceneManager object
      */
-    onSceneEnd(sceneManager) { this.light.dispose() }
+    onSceneEnd() { this.object3D.dispose() }
 }
