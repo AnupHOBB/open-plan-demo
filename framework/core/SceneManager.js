@@ -1,6 +1,6 @@
 import * as THREE from '../../node_modules/three/src/Three.js'
 import { RayCast } from './RayCast.js'
-import { SceneRenderer } from './SceneRenderer2.js'
+import { SceneRenderer } from './SceneRenderer.js'
 
 /**
  * Parent class for all actors, camera managers and any object that appears as part of the scene

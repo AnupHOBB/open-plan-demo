@@ -21,10 +21,10 @@ export const COMPONENTS = {
     },
     TOP_CABINET : {
         name : 'TOP_CABINET',
-        width : 0.9,
+        width : 0.4,
         height : 1.5,
         depth : 0.4,
-        thickness : 0.025,
+        thickness : 0.02,//0.025,
         standHeight: 0,
         assets : {
             body : ['assets/dummy/Top_Cabinet_01.glb'],
@@ -140,8 +140,8 @@ class Component
         if (object3D != undefined)
         {    
             this.component.attachObject3D(object3D)
+            return new Piece(object3D)
         }
-        return new Piece(object3D)
     }
 
     _extractModel(key)

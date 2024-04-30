@@ -70,35 +70,6 @@ window.onload = () =>
         let comp = new CONFIGURATOR2.TopCabinet()
         //let comp = new CONFIGURATOR2.BottomCabinet()
         comp.registerInScene(sceneManager)
-
-        let hasOutlined = false
-        setInterval(()=>{
-            if (hasOutlined)
-            {
-                comp.component.setLuminance(false)
-                sceneManager.outline('TOP_CABINET')
-                hasOutlined = false
-            }
-            else
-            {
-                comp.component.setLuminance(true)
-                sceneManager.removeOutline('TOP_CABINET')
-                hasOutlined = true
-            }
-        }, 1000)
-
-
-        /* setTimeout(()=>{
-            comp.setHeight(2)
-            comp.setWidth(2)
-            comp.setDepth(2)
-            console.log('dimensions changed')
-        }, 5000)
- */
-        /* setInterval(()=>{
-            comp.component.setLuminance(!comp.component.isLuminant())
-        }, 10) */
-
     })
 }
 
