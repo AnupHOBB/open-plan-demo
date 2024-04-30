@@ -284,7 +284,7 @@ export class SceneManager
         {
             this.activeCameraManager = cameraManager
             this.activeCameraManager.onActive(this)
-            this.sceneRenderer.setCamera(this.activeCameraManager.getCamera())
+            this.sceneRenderer.setCamera(this.activeCameraManager.getObject3D())
         }
     }
 

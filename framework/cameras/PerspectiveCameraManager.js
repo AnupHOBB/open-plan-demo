@@ -4,45 +4,17 @@ import { Maths } from '../helpers/maths.js'
 import { Matrix } from '../helpers/matrix.js'
 
 /**
- * Parent class for all camera managers
+ * Parent class for all perspective camera managers
  */
-export class CameraManager extends SceneObject
-{
-    /**
-     * @param {String} name name of the object which is used in sending or receiving message
-     */
-    constructor(name) { super(name) }
-
-    /**
-     * Delegates call to the register input function of OrbitalCameraManagerCore
-     * @param {InputManager} inputManager the input manager object that manages user input 
-     */
-    registerInput(inputManager) {}
-
-    /**
-     * Returns the threejs camera object stored within
-     * @returns {THREE.PerspectiveCamera} threejs camera object
-     */
-    getCamera() { return null }
-
-    /**
-     * Called by SceneManager when this camera object is set as active.
-     * @param {SceneManager} sceneManager the SceneManager object
-     */
-    onActive(sceneManager) {}
-}
-
-/**
- * Base class for all perspective cameras
- */
-export class PerspectiveCamera
+export class PerspectiveCameraManager extends SceneObject
 {
     /**
      * @param {Number} fov camera field of view
      */
-    constructor(fov)
+    constructor(name, fov)
     {
-        this.camera = new THREE.PerspectiveCamera(fov, window.innerWidth/window.innerHeight, 0.1, 1000)
+        super(name, new THREE.PerspectiveCamera(fov, window.innerWidth/window.innerHeight, 0.1, 1000))
+        this.camera = this.object3D
         this.camera.rotation.order = 'YXZ'
         this.camera.lookAt(0, 0, 0)
         this.front = new THREE.Vector3()
@@ -50,6 +22,19 @@ export class PerspectiveCamera
         this.up = new THREE.Vector3()
         this.viewMatrix = this.getViewMatrix()
     }
+    
+    /**
+     * Delegates call to the register input function of OrbitalCameraManagerCore
+     * @param {InputManager} inputManager the input manager object that manages user input 
+     */
+    registerInput(inputManager) {}
+
+    /**
+     * Called by SceneManager when this camera object is set as active.
+     * @param {SceneManager} sceneManager the SceneManager object
+     */
+    onActive(sceneManager) {}
+
 
     /**
      * Sets the position of the camera in world space
@@ -66,6 +51,14 @@ export class PerspectiveCamera
      * @param {Number} z z-coordinate in world space 
      */
     setRotation(x, y, z) { this.camera.rotation.set(x, y, z) }
+
+    /**
+     * Sets the position where the camera should look
+     * @param {Number} x x-coordinate in world space
+     * @param {Number} y y-coordinate in world space
+     * @param {Number} z z-coordinate in world space 
+     */
+    setLookAt(x, y, z) { this.camera.lookAt(x, y, z) }
 
     /**
      * Sets the camera aspect ratio

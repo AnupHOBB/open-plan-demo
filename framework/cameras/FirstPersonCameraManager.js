@@ -1,11 +1,11 @@
 import * as THREE from '../../node_modules/three/src/Three.js'
-import { CameraManager, PerspectiveCamera } from './CameraManager.js'
+import { PerspectiveCameraManager } from './PerspectiveCameraManager.js'
 import { Maths } from '../helpers/maths.js'
 
 /**
- * Wraps FirstPersonCameraManagerCore object.
+ * Extends the PerspectiveCameraManager to provide first person view support
  */
-export class FirstPersonCameraManager extends CameraManager
+export class FirstPersonCameraManager extends PerspectiveCameraManager
 {
     /**
      * @param {String} name name of the object which is used in sending or receiving message
@@ -13,8 +13,7 @@ export class FirstPersonCameraManager extends CameraManager
      */
     constructor(name, fov) 
     { 
-        super(name)
-        this.core = new FirstPersonCameraManagerCore(fov)
+        super(name, fov)
         this.moveSensitivity = 0.1 
     }
 
@@ -26,96 +25,17 @@ export class FirstPersonCameraManager extends CameraManager
     {
         if (inputManager != null)
         {
-            inputManager.registerKeyEvent(map => this.core.onKeyinput(map, this.moveSensitivity))
-            inputManager.registerLMBMoveEvent((dx, dy) => this.core.onMoveEvent(dx, dy))
+            inputManager.registerKeyEvent(map => this.onKeyinput(map, this.moveSensitivity))
+            inputManager.registerLMBMoveEvent((dx, dy) => this.onMoveEvent(dx, dy))
             inputManager.setCursorSensitivity(0.05)
         }
     }
-
-    /**
-     * Sets the position of the camera in world space
-     * @param {Number} x x-coordinate in world space
-     * @param {Number} y y-coordinate in world space
-     * @param {Number} z z-coordinate in world space 
-     */
-    setPosition(x, y, z) { this.core.setPosition(x, y, z) }
-
-    /**
-     * Sets the rotation of the camera in world space
-     * @param {Number} x x-coordinate in world space
-     * @param {Number} y y-coordinate in world space
-     * @param {Number} z z-coordinate in world space 
-     */
-    setRotation(x, y, z) { this.core.setRotation(x, y, z) }
-
-    /**
-     * Sets the position where the camera should look
-     * @param {Number} x x-coordinate in world space
-     * @param {Number} y y-coordinate in world space
-     * @param {Number} z z-coordinate in world space 
-     */
-    setLookAt(x, y, z) { this.core.camera.lookAt(x, y, z) }
 
     /**
      * Sets the sensitivity value for camera movement
      * @param {Number} sensitivity sensitivity value that affects camera movement
      */
     setMovementSensitivity(sensitivity) { this.moveSensitivity = sensitivity }
-
-    /**
-     * Sets the camera aspect ratio
-     * @param {Number} aspect aspect ratio of camera 
-     */
-    setAspectRatio(aspect) { this.core.setAspectRatio(aspect) }
-        
-    /**
-     * Returns world space position of the camera
-     * @returns {THREE.Vector3} world space position of camera 
-     */
-    getPosition() { return this.core.getPosition() }
-
-    /**
-     * Sets the aspect ratio value in camera
-     * @param {Number} ratio camera aspect ratio
-     */
-    setAspectRatio(ratio) { this.core.camera.aspect = ratio }
-
-    /**
-     * Delegates call to ENGINE.PerspectiveCamera's updateMatrices
-     */
-    updateMatrices() { this.core.updateMatrices() }
-    
-    /**
-     * Delegates call to ENGINE.PerspectiveCamera's worldToRaster
-     * @param {THREE.Vector3} worldPosition position of point in world whose raster coordinate is required
-     * @returns {[THREE.Vector2, Boolean]} [raster coordinate of the point whose world coordinate was given, 
-     * boolean value to indicate whether the raster coordinate is valid or not]
-     */
-    worldToRaster(worldPosition) { return this.core.worldToRaster(worldPosition) }
-
-    /**
-     * Delegates call to ENGINE.PerspectiveCamera's worldToView
-     * @param {THREE.Vector3} worldPosition position of point in world whose view space coordinate is required
-     * @returns {THREE.Vector3} position of point in view space whose world coordinate was given
-     */
-    worldToView(worldPosition) { return this.core.worldToView(worldPosition) }
-
-    /**
-     * Returns the threejs camera object stored within
-     * @returns {THREE.PerspectiveCamera} threejs camera object
-     */
-    getCamera() { return this.core.camera }
-}
-
-/**
- * Extends the functionality of PerspectiveCameraManager to provide first person camera feature
- */
-class FirstPersonCameraManagerCore extends PerspectiveCamera
-{
-    /**
-     * @param {Number} fov camera field of view
-     */
-    constructor(fov) { super(fov) }
 
     /**
      * Called by InputManager whenever it detects key strokes.

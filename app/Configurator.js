@@ -1,5 +1,5 @@
 import * as THREE from '../node_modules/three/src/Three.js'
-import * as ENGINE from '../engine/Engine.js'
+import * as ENGINE from '../framework/Framework.js'
 //import { BoxGeometry } from '../node_modules/three/src/geometries/BoxGeometry.js'
 
 /**

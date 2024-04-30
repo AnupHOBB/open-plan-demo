@@ -1,11 +1,8 @@
 import * as THREE from './node_modules/three/src/Three.js'
-//import * as ENGINE from './engine/Engine.js'
 import * as ENGINE from './framework/Framework.js'
 import { Cabinet, FAMILIES, CUBEMAP, WOOD } from './app/Configurator.js'
 import {GLTFLoader} from './node_modules/three/examples/jsm/loaders/GLTFLoader.js'
 import {DRACOLoader} from './node_modules/three/examples/jsm/loaders/DRACOLoader.js'
-import { FBXLoader } from './node_modules/three/examples/jsm/loaders/FBXLoader.js'
-
 import * as CONFIGURATOR2 from './app/Configurator2.js'
 
 const LAYOUT_INDEX = 6
