@@ -76,16 +76,18 @@ window.onload = () =>
             if (hasOutlined)
             {
                 comp.component.setLuminance(false)
-                sceneManager.removeOutline('TOP_CABINET')
+                sceneManager.outline('TOP_CABINET')
                 hasOutlined = false
             }
             else
             {
                 comp.component.setLuminance(true)
-                sceneManager.outline('TOP_CABINET')
+                sceneManager.removeOutline('TOP_CABINET')
                 hasOutlined = true
             }
         }, 1000)
+
+
         /* setTimeout(()=>{
             comp.setHeight(2)
             comp.setWidth(2)

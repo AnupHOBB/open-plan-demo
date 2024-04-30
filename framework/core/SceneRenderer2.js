@@ -3,6 +3,7 @@ import { DisplayComposer } from './composers/DisplayComposer.js'
 import { BloomComposer } from './composers/BloomComposer.js'
 import { SSAOComposer } from './composers/SSAOComposer.js'
 import { RenderComposer } from './composers/RenderComposer.js'
+import { Stats } from './Stats.js'
 
 /**
  * Renders the overall scene
@@ -23,6 +24,7 @@ export class SceneRenderer
         this.composers = [new RenderComposer(this.renderer), new SSAOComposer(this.renderer), new BloomComposer(this.renderer), new DisplayComposer(this.renderer)]
         this.activeCamera = undefined
         this.sceneObjects = new Map()
+        this.stats = undefined
     }
 
     /**
@@ -48,6 +50,27 @@ export class SceneRenderer
      * @param {Number} value tone mapping exposure value
      */
     setToneMappingExposure(value) { this.renderer.toneMappingExposure = value }
+
+    setBloomStrength(strength) 
+    { 
+        let composer = this._getComposer('BloomComposer')
+        if (composer != undefined)
+            composer.setBloomStrength(strength) 
+    }
+
+    setBloomThreshold(threshold) 
+    { 
+        let composer = this._getComposer('BloomComposer')
+        if (composer != undefined)
+            composer.setBloomThreshold(threshold) 
+    }
+
+    setBloomRadius(radius) 
+    { 
+        let composer = this._getComposer('BloomComposer')
+        if (composer != undefined)
+            composer.setBloomRadius(radius) 
+    }
 
     enableSSAO(enable) 
     {
@@ -156,6 +179,12 @@ export class SceneRenderer
     }
 
     /**
+     * Shows the stats for the scene
+     * @param {HTMLPreElement} htmlElement html pre element where the stats will be displayed
+     */
+    showStats(htmlElement) { this.stats = new Stats(this.renderer, htmlElement) }
+
+    /**
      * Sets the camera where the whole scene will be rendered from its viewpoint
      * @param {THREE.Camera} camera camera object
      */
@@ -239,6 +268,8 @@ export class SceneRenderer
                 composer.render(this.width, this.height, renderedTexture)
                 renderedTexture = composer.getRenderedScene()
             }
+            if (this.stats != undefined)
+                this.stats.update()
         }
     }
 
@@ -287,48 +318,6 @@ export class SceneRenderer
 
     setHighlightsColorBalance(highlightsRgb) { this.sceneRenderer.setHighlightsColorBalance(highlightsRgb) }
 ////////////////////////////////////Color Balance////////////////////////////////////////        
-////////////////////////////////////OUTLINE//////////////////////////////////////// 
-    outlineNearestObjectAt(rasterCoord, onOutline)
-    {
-        if (rasterCoord != undefined && rasterCoord.x >= 0 && rasterCoord.x < this.width && rasterCoord.y >= 0 && rasterCoord.y < this.height)
-        {
-            let bounds = this.canvas.getBoundingClientRect()
-            let ndcX = (rasterCoord.x / bounds.width) *  2 - 1
-            let ndcY = -(rasterCoord.y / bounds.height) *  2 + 1
-            let hitPointDataArray = this.raycast.raycast({x: ndcX, y: ndcY}, this.activeCameraManager)
-            let hitPointDataObject
-            let finalOutlineMeshes = []
-            if (hitPointDataArray != undefined && hitPointDataArray.length > 0)    
-            {    
-                hitPointDataObject = hitPointDataArray[0]
-                for (let outlineMesh of this.outlineMeshes)
-                    finalOutlineMeshes.push(outlineMesh)
-                finalOutlineMeshes.push(hitPointDataArray[0].object)
-            }
-            this.sceneRenderer.addObjectsToOutline(finalOutlineMeshes)
-            if (onOutline != undefined) 
-                onOutline(hitPointDataObject)
-        }
-    }
-
-    outlineMeshOf(sceneObjectName, meshName)
-    {
-        let sceneObject = this.sceneObjectMap.get(sceneObjectName)
-        if (sceneObject != undefined)
-        {
-            try
-            {
-                let mesh = sceneObject.getMesh(meshName)
-                if (mesh != undefined && mesh != null)
-                {    
-                    this.outlineMeshes.push(mesh)
-                    this.sceneRenderer.addObjectsToOutline(this.outlineMeshes)
-                }
-            }
-            catch (e) {}
-        }
-    }
-////////////////////////////////////OUTLINE//////////////////////////////////////// 
     setSharpness(sharpness) { this.sceneRenderer.setSharpness(sharpness) }
 
     setExposure(exposure) { this.sceneRenderer.setExposure(exposure) }
@@ -340,6 +329,4 @@ export class SceneRenderer
     setBrightness(brightness) { this.sceneRenderer.setBrightness(brightness) }
 
     setGamma(gamma) { this.sceneRenderer.setGamma(gamma) }
-
-    showStats(htmlElement) { this.sceneRenderer.showStats(htmlElement) }
  */

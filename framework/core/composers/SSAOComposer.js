@@ -10,6 +10,8 @@ export class SSAOComposer extends SceneComposer
         this.ssaoPass = undefined
         this.mergerPass = new MergerPass()
         this.composer.addPass(this.mergerPass)
+        this.merge = true
+        this.enabled = true
     }
 
     /**
@@ -28,7 +30,11 @@ export class SSAOComposer extends SceneComposer
         this.composer.insertPass(this.ssaoPass, 0)
     }
 
-    enable(enabled) { this.ssaoPass.output = enabled ? SSAOPass.OUTPUT.Default : SSAOPass.OUTPUT.Beauty }
+    enable(enabled) 
+    {
+        this.enabled = enabled 
+        this.mergerPass.showTexture2Only(!enabled) 
+    }
 
     /**
      * Sets the radius upto which ssao will be spread out in every pixel. Higher radius means ssao will be more spread out.
@@ -52,7 +58,11 @@ export class SSAOComposer extends SceneComposer
      * Enables or disables the ambient occlusion map of scene
      * @param {Boolean} show if true then the ambient occlusion map of entire scene will be visible 
      */
-    showAOMap(show) {  this.mergerPass.showTexture2Only(show) }
+    showAOMap(show) 
+    { 
+        this.ssaoPass.output = SSAOPass.OUTPUT.SSAO
+        this.merge = !show
+    }
 
     /**
      * Enables or disables the normal map of scene
@@ -61,7 +71,7 @@ export class SSAOComposer extends SceneComposer
     showNormalMap(show) 
     { 
         this.ssaoPass.output = show ? SSAOPass.OUTPUT.Normal : SSAOPass.OUTPUT.SSAO
-        this.mergerPass.showTexture2Only(show) 
+        this.merge = !show
     }
     
     /**
@@ -74,7 +84,7 @@ export class SSAOComposer extends SceneComposer
     {
         this.ssaoPass.width = width
         this.ssaoPass.height = height
-        this.mergerPass.updateTexture2(renderedTexture)
+        this.mergerPass.updateTexture2(this.merge || !this.enabled ? renderedTexture : undefined)
         this.composer.setSize(width, height) 
         this.composer.render()
     }

@@ -206,7 +206,6 @@ export class SceneManager
         this.messageMap = new Map()
         this.sceneRenderer = new SceneRenderer(canvas, this.width, this.height)
         this.canvas = canvas
-        this.outlineMeshes = []
         this._renderLoop()
     }
 
@@ -350,9 +349,7 @@ export class SceneManager
 
     setBackground(background) { this.sceneRenderer.setBackground(background) }
 
-    setBloomPercentage(percent) { this.sceneRenderer.setBloomPercentage(percent) }
-
-    setBloomIntensity(intensity) { this.sceneRenderer.setBloomIntensity(intensity) }
+    setBloomStrength(strength) { this.sceneRenderer.setBloomStrength(strength) }
 
     setBloomThreshold(threshold) { this.sceneRenderer.setBloomThreshold(threshold) }
 
@@ -431,18 +428,12 @@ export class SceneManager
             let ndcX = (rasterCoord.x / bounds.width) *  2 - 1
             let ndcY = -(rasterCoord.y / bounds.height) *  2 + 1
             let hitPointDataArray = this.raycast.raycast({x: ndcX, y: ndcY}, this.activeCameraManager)
-            let hitPointDataObject
-            let finalOutlineMeshes = []
             if (hitPointDataArray != undefined && hitPointDataArray.length > 0)    
             {    
-                hitPointDataObject = hitPointDataArray[0]
-                for (let outlineMesh of this.outlineMeshes)
-                    finalOutlineMeshes.push(outlineMesh)
-                finalOutlineMeshes.push(hitPointDataArray[0].object)
+                this.sceneRenderer.outlineObject3D(hitPointDataArray[0].object)
+                if (onOutline != undefined) 
+                    onOutline(hitPointDataArray[0])
             }
-            this.sceneRenderer.addObjectsToOutline(finalOutlineMeshes)
-            if (onOutline != undefined) 
-                onOutline(hitPointDataObject)
         }
     }
 
@@ -455,10 +446,7 @@ export class SceneManager
             {
                 let mesh = sceneObject.getMesh(meshName)
                 if (mesh != undefined && mesh != null)
-                {    
-                    this.outlineMeshes.push(mesh)
-                    this.sceneRenderer.addObjectsToOutline(this.outlineMeshes)
-                }
+                    this.sceneRenderer.outlineObject3D(mesh)
             }
             catch (e) {}
         }
