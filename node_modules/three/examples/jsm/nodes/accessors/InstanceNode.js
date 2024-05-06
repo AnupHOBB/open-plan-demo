@@ -1,10 +1,10 @@
 import Node, { addNodeClass } from '../core/Node.js';
-import { instanceIndex } from '../core/InstanceIndexNode.js';
-import { temp } from '../core/VarNode.js';
-import { buffer } from './BufferNode.js';
+import { varyingProperty } from '../core/PropertyNode.js';
+import { instancedBufferAttribute, instancedDynamicBufferAttribute } from './BufferAttributeNode.js';
 import { normalLocal } from './NormalNode.js';
 import { positionLocal } from './PositionNode.js';
-import { nodeProxy, vec3, mat3 } from '../shadernode/ShaderNode.js';
+import { nodeProxy, vec3, mat3, mat4 } from '../shadernode/ShaderNode.js';
+import { DynamicDrawUsage, InstancedInterleavedBuffer, InstancedBufferAttribute } from 'three';
 
 class InstanceNode extends Node {
 
@@ -14,17 +14,49 @@ class InstanceNode extends Node {
 
 		this.instanceMesh = instanceMesh;
 
-		//
+		this.instanceMatrixNode = null;
 
-		const instanceBufferNode = buffer( instanceMesh.instanceMatrix.array, 'mat4', instanceMesh.count );
-
-		this.instanceMatrixNode = temp( instanceBufferNode.element( instanceIndex ) ); // @TODO: a possible caching issue here?
+		this.instanceColorNode = null;
 
 	}
 
-	generate( builder ) {
+	setup( /*builder*/ ) {
 
-		const { instanceMatrixNode } = this;
+		let instanceMatrixNode = this.instanceMatrixNode;
+
+		const instanceMesh = this.instanceMesh;
+
+		if ( instanceMatrixNode === null ) {
+
+			const instanceAttribute = instanceMesh.instanceMatrix;
+			const buffer = new InstancedInterleavedBuffer( instanceAttribute.array, 16, 1 );
+
+			const bufferFn = instanceAttribute.usage === DynamicDrawUsage ? instancedDynamicBufferAttribute : instancedBufferAttribute;
+
+			const instanceBuffers = [
+				// F.Signature -> bufferAttribute( array, type, stride, offset )
+				bufferFn( buffer, 'vec4', 16, 0 ),
+				bufferFn( buffer, 'vec4', 16, 4 ),
+				bufferFn( buffer, 'vec4', 16, 8 ),
+				bufferFn( buffer, 'vec4', 16, 12 )
+			];
+
+			instanceMatrixNode = mat4( ...instanceBuffers );
+
+			this.instanceMatrixNode = instanceMatrixNode;
+
+		}
+
+		const instanceColorAttribute = instanceMesh.instanceColor;
+
+		if ( instanceColorAttribute && this.instanceColorNode === null ) {
+
+			const buffer = new InstancedBufferAttribute( instanceColorAttribute.array, 3 );
+			const bufferFn = instanceColorAttribute.usage === DynamicDrawUsage ? instancedDynamicBufferAttribute : instancedBufferAttribute;
+
+			this.instanceColorNode = vec3( bufferFn( buffer, 'vec3', 3, 0 ) );
+
+		}
 
 		// POSITION
 
@@ -40,8 +72,16 @@ class InstanceNode extends Node {
 
 		// ASSIGNS
 
-		positionLocal.assign( instancePosition ).build( builder );
-		normalLocal.assign( instanceNormal ).build( builder );
+		positionLocal.assign( instancePosition );
+		normalLocal.assign( instanceNormal );
+
+		// COLOR
+
+		if ( this.instanceColorNode !== null ) {
+
+			varyingProperty( 'vec3', 'vInstanceColor' ).assign( this.instanceColorNode );
+
+		}
 
 	}
 
@@ -51,4 +91,4 @@ export default InstanceNode;
 
 export const instance = nodeProxy( InstanceNode );
 
-addNodeClass( InstanceNode );
+addNodeClass( 'InstanceNode', InstanceNode );

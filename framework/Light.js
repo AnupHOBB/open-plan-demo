@@ -91,20 +91,6 @@ export class DirectLight extends SceneObject
     }
 
     /**
-     * Sets the position of the light in world space
-     * @param {Number} x x-coordinate in world space
-     * @param {Number} y y-coordinate in world space
-     * @param {Number} z z-coordinate in world space 
-     */
-    setPosition(x, y, z) { this.object3D.position.set(x, y, z) }
-
-    getPosition() { return this.object3D.position }
-
-    setRotation(x, y, z) { this.object3D.setRotationFromEuler(new THREE.Euler(x, y, z)) }
-
-    getRotation() { return this.object3D.rotation }
-
-    /**
      * Sets the position where the light is supposed to look at
      * @param {Number} x x-coordinate in world space
      * @param {Number} y y-coordinate in world space
@@ -169,14 +155,6 @@ export class PointLight extends SceneObject
     }
 
     /**
-     * Sets the position of the light in world space
-     * @param {Number} x x-coordinate in world space
-     * @param {Number} y y-coordinate in world space
-     * @param {Number} z z-coordinate in world space 
-     */
-    setPosition(x, y, z) { this.object3D.position.set(x, y, z) }
-
-    /**
      * Sets the light intensity
      * @param {Number} intensity the intensity to be applied 
      */
@@ -231,14 +209,6 @@ export class SpotLight extends SceneObject
             this.object3D.shadow.needsUpdate = true
         }
     }
-
-    /**
-     * Sets the position of the light in world space
-     * @param {Number} x x-coordinate in world space
-     * @param {Number} y y-coordinate in world space
-     * @param {Number} z z-coordinate in world space 
-     */
-    setPosition(x, y, z) { this.object3D.position.set(x, y, z) }
 
     /**
      * Sets the position where the light is supposed to look at

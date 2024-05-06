@@ -49,7 +49,7 @@ export const FAMILIES = Object.freeze({
     FAMILY3: [LAYOUTS.LAYOUT1, LAYOUTS.LAYOUT4],
 })
 
-export class Cabinet
+export class Closet
 {
     constructor(family, sceneManager, assetMap) 
     { 

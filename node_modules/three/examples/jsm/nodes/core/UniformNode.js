@@ -1,4 +1,5 @@
 import InputNode from './InputNode.js';
+import { objectGroup } from './UniformGroupNode.js';
 import { addNodeClass } from './Node.js';
 import { nodeObject, getConstNodeType } from '../shadernode/ShaderNode.js';
 
@@ -10,11 +11,47 @@ class UniformNode extends InputNode {
 
 		this.isUniformNode = true;
 
+		this.groupNode = objectGroup;
+
+	}
+
+	setGroup( group ) {
+
+		this.groupNode = group;
+
+		return this;
+
+	}
+
+	getGroup() {
+
+		return this.groupNode;
+
 	}
 
 	getUniformHash( builder ) {
 
 		return this.getHash( builder );
+
+	}
+
+	onUpdate( callback, updateType ) {
+
+		const self = this.getSelf();
+
+		callback = callback.bind( self );
+
+		return super.onUpdate( ( frame ) => {
+
+			const value = callback( frame, self );
+
+			if ( value !== undefined ) {
+
+				this.value = value;
+
+			}
+
+	 	}, updateType );
 
 	}
 
@@ -36,8 +73,10 @@ class UniformNode extends InputNode {
 
 		const sharedNodeType = sharedNode.getInputType( builder );
 
-		const nodeUniform = builder.getUniformFromNode( sharedNode, builder.shaderStage, sharedNodeType );
+		const nodeUniform = builder.getUniformFromNode( sharedNode, sharedNodeType, builder.shaderStage, builder.context.label );
 		const propertyName = builder.getPropertyName( nodeUniform );
+
+		if ( builder.context.label !== undefined ) delete builder.context.label;
 
 		return builder.format( propertyName, type, output );
 
@@ -58,4 +97,4 @@ export const uniform = ( arg1, arg2 ) => {
 
 };
 
-addNodeClass( UniformNode );
+addNodeClass( 'UniformNode', UniformNode );

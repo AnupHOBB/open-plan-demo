@@ -1,7 +1,6 @@
 import * as THREE from '../../node_modules/three/src/Three.js'
 import { DisplayComposer } from './composers/DisplayComposer.js'
 import { BloomComposer } from './composers/BloomComposer.js'
-import { SSAOComposer } from './composers/SSAOComposer.js'
 import { RenderComposer } from './composers/RenderComposer.js'
 import { Stats } from './Stats.js'
 
@@ -21,7 +20,7 @@ export class SceneRenderer
         this.renderer.toneMapping = THREE.ACESFilmicToneMapping
         this.renderer.toneMappingExposure = 1
         this.renderer.setPixelRatio(window.devicePixelRatio)
-        this.composers = [new RenderComposer(this.renderer), new SSAOComposer(this.renderer), new BloomComposer(this.renderer), new DisplayComposer(this.renderer)]
+        this.composers = [new RenderComposer(this.renderer), new BloomComposer(this.renderer), new DisplayComposer(this.renderer)]
         this.activeCamera = undefined
         this.sceneObjects = new Map()
         this.stats = undefined
@@ -80,42 +79,42 @@ export class SceneRenderer
 
     enableSSAO(enable) 
     {
-        let composer = this._getComposer('SSAOComposer')
+        let composer = this._getComposer('RenderComposer')
         if (composer != undefined) 
             composer.enable(enable) 
     }
 
     setSSAORadius(radius) 
     {
-        let composer = this._getComposer('SSAOComposer')
+        let composer = this._getComposer('RenderComposer')
         if (composer != undefined) 
             composer.setKernelRadius(radius) 
     }
 
     setSSAOMinDistance(minDist) 
     { 
-        let composer = this._getComposer('SSAOComposer')
+        let composer = this._getComposer('RenderComposer')
         if (composer != undefined) 
             composer.setMinDistance(minDist) 
     }
 
     setSSAOMaxDistance(maxDist) 
     { 
-        let composer = this._getComposer('SSAOComposer')
+        let composer = this._getComposer('RenderComposer')
         if (composer != undefined) 
             composer.setMaxDistance(maxDist) 
     }
 
     setSSAOShowAOMap(show) 
     {  
-        let composer = this._getComposer('SSAOComposer')
+        let composer = this._getComposer('RenderComposer')
         if (composer != undefined) 
             composer.showAOMap(show)
     }
 
     setSSAOShowNormalMap(show) 
     { 
-        let composer = this._getComposer('SSAOComposer')
+        let composer = this._getComposer('RenderComposer')
         if (composer != undefined) 
             composer.showNormalMap(show) 
     }
@@ -297,9 +296,6 @@ export class SceneRenderer
             let renderComposer = this._getComposer('RenderComposer')
             if (renderComposer != undefined) 
                 renderComposer.setup(this.activeCamera)  
-            let ssaoComposer = this._getComposer('SSAOComposer')
-            if (ssaoComposer != undefined) 
-                ssaoComposer.setup(this.activeCamera)  
             let bloomComposer = this._getComposer('BloomComposer')
             if (bloomComposer != undefined) 
                 bloomComposer.setup(this.activeCamera)
