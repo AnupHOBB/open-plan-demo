@@ -1,4 +1,5 @@
 import * as THREE from '../../node_modules/three/src/Three.js'
+import { Maths } from '../helpers/maths.js'
 import { RayCast } from './RayCast.js'
 import { SceneRenderer } from './SceneRenderer.js'
 
@@ -39,11 +40,11 @@ export class SceneObject
 
     /**
      * Sets the rotation of the mesh in world space using euler values
-     * @param {Number} x pitch in world space in radians
-     * @param {Number} y yaw in world space in radians
-     * @param {Number} z roll in world space in radians 
+     * @param {Number} x pitch in world space in degrees
+     * @param {Number} y yaw in world space in degrees
+     * @param {Number} z roll in world space in degrees 
      */
-    setRotation(x, y, z) { this.object3D.rotation.set(x, y, z) }
+    setRotation(x, y, z) { this.object3D.rotation.set(Maths.toRadians(x), Maths.toRadians(y), Maths.toRadians(z)) }
     
     /**
      * Sets the rotation of the mesh in world space using axis and angle

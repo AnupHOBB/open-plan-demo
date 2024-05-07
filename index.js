@@ -63,10 +63,12 @@ window.onload = () =>
         let input = new FRAMEWORK.InputManager('Input')
         sceneManager.register(input)
         cameraManager.registerInput(input)
-        let comp = new CONFIGURATOR2.Cabinet(DATA.COMPONENTS.BOTTOM_CABINET)
+        let comp = new CONFIGURATOR2.Cabinet(DATA.COMPONENTS.BOTTOM_CABINET, true, true, false)
         comp.registerInScene(sceneManager)
+        comp.openDoor()
+        //comp.closeDoor()
 
-        setTimeout(()=>{
+        /* setTimeout(()=>{
             comp.setHeight(2)
         }, 2000)
 
@@ -76,6 +78,6 @@ window.onload = () =>
 
         setTimeout(()=>{
             comp.setHeight(1)
-        }, 8000)
+        }, 8000) */
     })
 }

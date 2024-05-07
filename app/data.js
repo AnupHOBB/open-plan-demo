@@ -8,31 +8,39 @@ export const COMPONENTS = {
         width : 0.4,
         height : 0.9,
         depth : 0.4,
-        thickness : 0.02,
-        standHeight: 0.1,
+        legHeight: 0.1,
+        doorOffset : { x: 0.17, y: 0.14, z: 0.2 },
+        wallOffset : { x: 0.19, y: 0.14, z: 0 },
+        handleOffset : { x: -0.32, y: 0.45, z: 0 },
+        standOffset : { x: 0.189, y: 0, z: 0.19 },
         assets : {
-            body : ['assets/dummy/Bottom_Cabinet_01.glb'],
-            leftWall : ['assets/dummy/Bottom_Cabinet_SideWall_Left_01.glb'],
-            rightWall : ['assets/dummy/Bottom_Cabinet_SideWall_Right_01.glb'],
-            leftDoor : [],//['assets/dummy/Bottom_Door_Left_01.glb'],
-            rightDoor : [],//['assets/dummy/Bottom_Door_Right_01.glb'],
-            shelf : ['assets/dummy/Bottom_Shelf_01.glb']
+            body : ['assets/layout10/Bottom_Cabinet.glb'],
+            wall : ['assets/layout10/Bottom_Cabinet_Panel.glb'],
+            door : ['assets/layout10/Bottom_Door.glb'],// rotation angles L : 180, R : 0
+            shelf : ['assets/layout10/Plank.glb'],
+            handle : ['assets/layout10/Handle.glb'],
+            sideleg : ['assets/layout10/Leg_Left_Front_01.glb'],// rotation angles FL : 0, FR : 90, BR : 180, BL : 270
+            centerLeg : []
         }
     },
     TOP_CABINET : {
         name : 'TOP_CABINET',
         width : 0.4,
-        height : 1.5,
+        height : 1.1,
         depth : 0.4,
-        thickness : 0.02,
-        standHeight: 0,
+        legHeight: 0,
+        doorOffset : { x: 0.17, y: 0.014, z: 0.2 },
+        wallOffset : { x: 0.199, y: 0.043, z: 0 },
+        handleOffset : { x: -0.32, y: 0.55, z: 0 },
+        standOffset : { x: 0, y: 0, z: 0 },
         assets : {
-            body : ['assets/dummy/Top_Cabinet_01.glb'],
-            leftWall : ['assets/dummy/Top_Cabinet_SideWall_Left_01.glb'],
-            rightWall : ['assets/dummy/Top_Cabinet_SideWall_Right_01.glb'],
-            leftDoor : [],//['assets/dummy/Top_Door_Left_01.glb'],
-            rightDoor : [],//['assets/dummy/Top_Door_Right_01.glb'],
-            shelf : ['assets/dummy/Bottom_Shelf_01.glb']
+            body : ['assets/layout10/Top_Cabinet.glb'],
+            wall : ['assets/layout10/Top_Side_Glass.glb'],
+            door : ['assets/layout10/Top_Door.glb'],// rotation angles L : 180, R : 0
+            shelf : ['assets/layout10/Plank.glb'],
+            handle : ['assets/layout10/Handle.glb'],
+            sideleg : [],// rotation angles FL : 0, FR : 90, BR : 180, BL : 270
+            centerLeg : []
         }
     }
 }
