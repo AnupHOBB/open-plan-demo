@@ -1,22 +1,20 @@
 import * as THREE from './node_modules/three/src/Three.js'
 import * as FRAMEWORK from './framework/Framework.js'
-import { CUBEMAP } from './app/Configurator.js'
 import {GLTFLoader} from './node_modules/three/examples/jsm/loaders/GLTFLoader.js'
 import {DRACOLoader} from './node_modules/three/examples/jsm/loaders/DRACOLoader.js'
-import * as CONFIGURATOR2 from './app/Configurator2.js'
-import * as DATA from './app/data.js'
+import * as CONFIGURATOR from './app/Configurator.js'
+//import * as DATA from './app/data.js'
 
 const LAYOUT_INDEX = 6
 const TANGENT_ANGLE_OF_ELEVATION = 0.17333333333333334
 
 window.onload = () => 
 {
-    const ENVMAP_TEXTURES = ['./assets/cubemap/right.jpg','./assets/cubemap/left.jpg','./assets/cubemap/top.jpg','./assets/cubemap/bottom.jpg','./assets/cubemap/front.jpg','./assets/cubemap/back.jpg']
     let loader = new FRAMEWORK.AssetLoader()
-    loader.addLoader(CUBEMAP, ENVMAP_TEXTURES, new THREE.CubeTextureLoader())
-    for (let componentKey in DATA.COMPONENTS)
+    loader.addLoader(CONFIGURATOR.CUBEMAP, CONFIGURATOR.ENVMAP_TEXTURES, new THREE.CubeTextureLoader())
+    for (let componentKey in CONFIGURATOR.COMPONENTS)
     {
-        let componentJson = DATA.COMPONENTS[componentKey]
+        let componentJson = CONFIGURATOR.COMPONENTS[componentKey]
         let assetJson = componentJson['assets']
         for (let key in assetJson)
         {
@@ -31,7 +29,7 @@ window.onload = () =>
             }
         }
     }
-    loader.execute(DATA.ASSET_MAP, assets => {
+    loader.execute(CONFIGURATOR.ASSET_MAP, assets => {
         let canvas = document.querySelector('canvas')
         let sceneManager = new FRAMEWORK.SceneManager(canvas, true)
         let cameraManager = new FRAMEWORK.OrbitalCameraManager('Camera', 15)
@@ -55,7 +53,7 @@ window.onload = () =>
         sceneManager.register(cameraManager)
         sceneManager.setActiveCamera('Camera')
         sceneManager.setSizeInPercent(0.68, 1)
-        sceneManager.setBackground(assets.get(CUBEMAP))
+        sceneManager.setBackground(assets.get(CONFIGURATOR.CUBEMAP))
         let directLight = new FRAMEWORK.DirectLight('DirectLight', new THREE.Color(1, 1, 1), 10)
         directLight.setPosition(0, 5, 3)
         directLight.setLookAt(0, 100, 0)
@@ -63,7 +61,7 @@ window.onload = () =>
         let input = new FRAMEWORK.InputManager('Input')
         sceneManager.register(input)
         cameraManager.registerInput(input)
-        let comp = new CONFIGURATOR2.Cabinet(DATA.COMPONENTS.BOTTOM_CABINET, true, true, false)
+        let comp = new CONFIGURATOR.Cabinet(CONFIGURATOR.COMPONENTS.TOP_CABINET)
         comp.registerInScene(sceneManager)
         comp.openDoor()
         //comp.closeDoor()
