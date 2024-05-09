@@ -1,26 +1,29 @@
+import * as CONFIGURATOR from './Configurator.js'
 import { Cabinet } from './Component.js'
 
 export class Column
 {
-    constructor(name, layout, width, assetMap) 
+    constructor(name, layout, isLeftEdge = true, isRightEdge = true) 
     {
         this.name = name 
         this.bottomComponents = []
         this.topComponents = []
         this.isAddedToScene = false
         this.layout = layout
-        this.width = width
+        this.width = CONFIGURATOR.MIN_WIDTH
         this.height = this._calculateHeight(layout)
-        this.bottomHeight = this.layout.getBottomHeight(this.height)
+        this.bottomHeight = this.layout.bottomHeight(this.height)
         this.topHeight = this.height - this.bottomHeight
         this.position = {x:0, y:0, z:0}
-        this.assetMap = assetMap
+        this.isLeftEdge = isLeftEdge
+        this.isRightEdge = isRightEdge
         this._prepareComponents(layout)
+        this.setHeight(this.height)
     }
 
     setWidth(width) 
     { 
-        if (width <= MAX_COLUMN_WIDTH)
+        if (width <= CONFIGURATOR.MAX_COLUMN_WIDTH)
         {    
             this.width = width
             for (let component of this.bottomComponents)
@@ -30,12 +33,41 @@ export class Column
         }
     }
 
+    setLeftEdge(isLeftEdge)
+    {
+        this.isLeftEdge = isLeftEdge
+        for (let component of this.bottomComponents)
+        {
+            if (component instanceof Cabinet)   
+                component.showLeftWall(this.isLeftEdge)
+        }
+        for (let component of this.topComponents)
+        {
+            if (component instanceof Cabinet)   
+                component.showLeftWall(this.isLeftEdge)
+        }
+    }
+
+    setRightEdge(isRightEdge)
+    {
+        this.isRightEdge = isRightEdge
+        for (let component of this.bottomComponents)
+        {
+            if (component instanceof Cabinet)   
+                component.showRightWall(this.isRightEdge)
+        }
+        for (let component of this.topComponents)
+        {
+            if (component instanceof Cabinet)   
+                component.showRightWall(this.isRightEdge)
+        }
+    }
+
     setHeight(height)
     {
         if (this._isHeightValid(height))
         {
-            //TODO slight modification to this logic
-            let newBottomHeight = this.layout.getBottomHeight(height)
+            let newBottomHeight = this.layout.bottomHeight(height)
             let deltaBottomHeight = newBottomHeight - this.bottomHeight
             let deltaBottomHeightPerComponent = deltaBottomHeight/this.bottomComponents.length
             this.bottomHeight = newBottomHeight
@@ -58,19 +90,16 @@ export class Column
     {
         if (position != undefined && position.x != undefined && position.y != undefined && position.z != undefined)
         {
-            //TODO slight modification to this logic
             let componentPosition = { x: position.x, y: position.y, z: position.z }
             for (let component of this.bottomComponents)
             {
-                componentPosition.y += component.height/2.0
                 component.setPosition(componentPosition.x, componentPosition.y, componentPosition.z)
-                componentPosition.y += component.height/2.0
+                componentPosition.y += component.height
             }
             for (let component of this.topComponents)
             {
-                componentPosition.y += component.height/2.0
                 component.setPosition(componentPosition.x, componentPosition.y, componentPosition.z)
-                componentPosition.y += component.height/2.0
+                componentPosition.y += component.height
             }
             this.position = { x: position.x, y: position.y, z: position.z }
         }
@@ -100,31 +129,63 @@ export class Column
         }
     }
 
+    openTopDoors(open = false)
+    {
+        for (let component of this.topComponents)
+        {
+            if (open)    
+                component.openDoor()
+            else
+                component.closeDoor()
+        } 
+    }
+
+    openBottomDoors(open = false)
+    {
+        for (let component of this.bottomComponents)
+        {
+            if (open)    
+                component.openDoor()
+            else
+                component.closeDoor()
+        } 
+    }
+
     _prepareComponents(layout)
     {
-        let bottomComponents = layout.bottom
-        for (let componentType of bottomComponents)
-            this.bottomComponents.push(new Component(this.name+componentType.type, this.width, componentType, this.assetMap))
-        let topComponents = layout.top
-        for (let componentType of topComponents)
-            this.topComponents.push(new Component(this.name+componentType.type, this.width, componentType, this.assetMap))
+        let doorLeft = true
+        for (let i=0; i<layout.bottom.length; i++)
+        {    
+
+            this.bottomComponents.push(this._getComponent(layout.bottom[i], i==0, i==(layout.bottom.length - 1), doorLeft))
+            doorLeft = !doorLeft
+        }
+        doorLeft = true
+        for (let i=0; i<layout.top.length; i++)
+        {    
+            this.topComponents.push(this._getComponent(layout.top[i], i==0, i==(layout.top.length - 1), doorLeft))
+            doorLeft = !doorLeft
+        }
+    }
+
+    _getComponent(json, isLeftEdge, isRightEdge, isLeftDoor)
+    {
+        if (json.name.includes('CABINET'))
+            return new Cabinet(this.name, json, isLeftEdge, isRightEdge, isLeftDoor)
     }
 
     _isHeightValid(height)
     {
-        return (this.layout.part == 1 && height >= MIN_ONE_PART_COLUMN_HEIGHT && height <= MAX_ONE_PART_COLUMN_HEIGHT) || 
-        (this.layout.part == 2 && height >= MIN_TWO_PART_COLUMN_HEIGHT && height <= MAX_TWO_PART_COLUMN_HEIGHT)
+        return true
     }
 
     _calculateHeight(layout)
     {
         let height = 0
-        let bottomComponents = layout.bottom
-        for (let componentType of bottomComponents)
-            height += componentType.height
-        let topComponents = layout.top
-        for (let componentType of topComponents)
-            height += componentType.height
+        for (let json of layout.bottom)
+            height += json.height
+        for (let json of layout.top)
+            height += json.height
         return height
     }
 }

@@ -66,6 +66,8 @@ export class Piece
         }
     }
 
+    setVisibility(visible) { this.object3D.visible = visible }
+
     _collectBones()
     {
         this._traversePieceForBones(this.object3D, this.bonesWidth, 'Width')

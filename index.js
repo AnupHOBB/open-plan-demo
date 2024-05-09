@@ -61,11 +61,16 @@ window.onload = () =>
         let input = new FRAMEWORK.InputManager('Input')
         sceneManager.register(input)
         cameraManager.registerInput(input)
-        let comp = new CONFIGURATOR.Cabinet(CONFIGURATOR.COMPONENTS.TOP_CABINET)
-        comp.registerInScene(sceneManager)
-        comp.openDoor()
-        //comp.closeDoor()
+        let closet = new CONFIGURATOR.Closet(CONFIGURATOR.FAMILIES.FAMILY1, sceneManager)
+        closet.addToScene()
 
+        setTimeout(()=>{
+            closet.setWidth(2)
+        }, 2000)
+
+        setTimeout(()=>{
+            closet.setWidth(0.4)
+        }, 5000)
         /* setTimeout(()=>{
             comp.setHeight(2)
         }, 2000)

@@ -28,8 +28,6 @@ export class SceneObject
         this.luminance = false
     }
 
-    enableRayCastingOnTriMesh(enable) { this.drawables[0].isRayCastable = enable }    
-
     /**
      * Sets the position of the mesh in world space
      * @param {Number} x x-coordinate in world space
@@ -89,9 +87,13 @@ export class SceneObject
     {
         if (sceneObject != undefined)
         {
-            sceneObject.object3D.parent = this.object3D
-            this.object3D.children.push(sceneObject.object3D)
-            this.children.push(sceneObject)
+            let i = this.object3D.children.indexOf(sceneObject.object3D)
+            if (i < 0)
+            {
+                sceneObject.object3D.parent = this.object3D
+                this.object3D.children.push(sceneObject.object3D)
+                this.children.push(sceneObject)
+            }
         }
     }
 
@@ -116,16 +118,20 @@ export class SceneObject
     }
 
     /**
-     * Attaches another threejs object3D to this one
+     * Attaches another threejs object3D to this one if the child object3D is not already attached.
      * @param {THREE.Object3D} object3D 
      */
     attachObject3D(object3D)
     {
         if (object3D != undefined)
         {
-            object3D.parent = this.object3D
-            this.object3D.children.push(object3D)
-            this.childrenObject3D.push(object3D)
+            let i = this.object3D.children.indexOf(object3D)
+            if (i < 0)
+            {
+                object3D.parent = this.object3D
+                this.object3D.children.push(object3D)
+                this.childrenObject3D.push(object3D)
+            }    
         }
     }
 

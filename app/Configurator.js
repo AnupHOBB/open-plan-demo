@@ -1,7 +1,26 @@
+/////////////TO BE REMOVED/////////////
 export {Cabinet} from './Component.js'
+export {Column} from './Column.js'
+///////////////////////////////////////
 
-export const ASSET_MAP = new Map()
+
+export {Closet} from './Closet.js'
+/**
+ * Minimum width of a column is 40cm and maximum is 76cm.
+ * If the cabinet width exceeds 76cm then another column such that the width of each column will be equal to the total width of cabinet divided by number of columns
+ * 
+ * Cabinet cannot have more than 5 columns
+ */
+export const MIN_WIDTH = 0.4
+export const MAX_WIDTH = 3.5
+export const MAX_COLUMN_WIDTH = 0.76
+export const MAX_TWO_PART_COLUMN_HEIGHT = 2.6
+export const MIN_TWO_PART_COLUMN_HEIGHT = 2
+export const MAX_ONE_PART_COLUMN_HEIGHT = 2.2
+export const MIN_ONE_PART_COLUMN_HEIGHT = 0.8
+export const DEPTH = 0.4
 export const MAX_SHELF_OFFSET = 0.5
+export const ASSET_MAP = new Map()
 export const CUBEMAP = 'cubemap'
 export const ENVMAP_TEXTURES = ['./assets/cubemap/right.jpg','./assets/cubemap/left.jpg','./assets/cubemap/top.jpg','./assets/cubemap/bottom.jpg','./assets/cubemap/front.jpg','./assets/cubemap/back.jpg']
     
@@ -49,14 +68,10 @@ export const COMPONENTS = {
 }
 
 export const LAYOUTS = Object.freeze({
-    LAYOUT1: {layout: '10', bottom : [COMPONENTS.BOTTOM_CABINET], top : [COMPONENTS.TOP_CABINET],
-        bottomHeight : function(height) { return (height > 2.2) ? 0.9 : 0.8 }
-    },
-    LAYOUT2: {layout: '10', bottom : [COMPONENTS.BOTTOM_DRAWER], top : [COMPONENTS.TOP_DRAWER], bottomHeight : function() { return 0.3 }}
+    LAYOUT1: {layout: '10', bottom : [COMPONENTS.BOTTOM_CABINET], top : [COMPONENTS.TOP_CABINET], bottomHeight : function(height) { return (height > 2.2) ? 0.9 : 0.8 }},
+    LAYOUT2: {layout: '10', bottom : [COMPONENTS.BOTTOM_CABINET], top : [COMPONENTS.TOP_CABINET], bottomHeight : function() { return 0.3 }}
 })
 
 export const FAMILIES = Object.freeze({
-    FAMILY1: [LAYOUTS.LAYOUT1, LAYOUTS.LAYOUT2],
-    FAMILY2: [LAYOUTS.LAYOUT2, LAYOUTS.LAYOUT3],
-    FAMILY3: [LAYOUTS.LAYOUT1, LAYOUTS.LAYOUT4],
+    FAMILY1: [LAYOUTS.LAYOUT1, LAYOUTS.LAYOUT2]
 })
