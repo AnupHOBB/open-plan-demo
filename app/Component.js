@@ -40,6 +40,22 @@ class Component
             sceneManager.unregister(this.name)
     }
 
+    open() {}
+
+    close() {}
+
+    showLeftWall(show) {}
+
+    showRightWall(show) {}
+
+    swapLeftLegsWithCenter(swap) {}
+
+    swapRightLegsWithCenter(swap) {}
+
+    showLeftLegs(show) {}
+
+    showRightLegs(show) {}
+
     _attachPiece(piece)
     {
         if (piece != undefined)
@@ -66,7 +82,7 @@ class Component
 
 export class Cabinet extends Component
 {
-    constructor(columnName, json, useLeftWall = true, useRightWall = true, useLeftDoor = false) 
+    constructor(columnName, json, useLeftDoor = false)
     { 
         super(columnName, json)
         this.useLeftDoor = useLeftDoor
@@ -74,26 +90,27 @@ export class Cabinet extends Component
         this.body = this._getPiece(json.name + json.assets.body[0])
         this._attachPiece(this.body)
         this.leftWall = this._getPiece(json.name + json.assets.wall[0])
-        if (useLeftWall)
-            this._attachPiece(this.leftWall)
+        this._attachPiece(this.leftWall)
         this.rightWall = this._getPiece(json.name + json.assets.wall[0])
-        if (useRightWall)
-            this._attachPiece(this.rightWall)
-        this.shelves = []
-        this._maintainShelves()
+        this._attachPiece(this.rightWall)
         this.handle = this._getPiece(json.name + json.assets.handle[0])
         this.door = this._getPiece(json.name + json.assets.door[0])
         if (this.door != undefined) 
             this.door.attach(this.handle)
         this._attachPiece(this.door)
-        this.flLeg = useLeftWall ? this._getPiece(json.name + json.assets.sideleg[0]) : undefined
+        this.shelves = []
+        this._maintainShelves()
+        this.flLeg = this._getPiece(json.name + json.assets.sideleg[0])
         this._attachPiece(this.flLeg)
-        this.frLeg = this._getPiece(json.name + (useRightWall ? json.assets.sideleg[0] : json.assets.centerLeg[0]))
+        this.frLeg = this._getPiece(json.name + json.assets.sideleg[0])
         this._attachPiece(this.frLeg)
-        this.brLeg = this._getPiece(json.name + (useRightWall ? json.assets.sideleg[0] : json.assets.centerLeg[0]))
+        this.brLeg = this._getPiece(json.name + json.assets.sideleg[0])
         this._attachPiece(this.brLeg)
-        this.blLeg = useLeftWall ? this._getPiece(json.name + json.assets.sideleg[0]) : undefined
-        this._attachPiece(this.blLeg) 
+        this.blLeg = this._getPiece(json.name + json.assets.sideleg[0])
+        this._attachPiece(this.blLeg)
+
+        this.fcLeg = this._getPiece(json.name + json.assets.centerLeg[0])
+        this.bcLeg = this._getPiece(json.name + json.assets.centerLeg[0])
         this._reorientPieces(json)
     }
 
@@ -161,13 +178,13 @@ export class Cabinet extends Component
         this.offset(0, 0, delta/2)
     }
 
-    openDoor() 
+    open() 
     { 
         if (this.door != undefined)
             this.door.setRotation(0, this.useLeftDoor ? -315 : 135, 0) 
     }
 
-    closeDoor() 
+    close() 
     { 
         if (this.door != undefined)
             this.door.setRotation(0, this.useLeftDoor ? 180 : 0, 0)
@@ -176,44 +193,92 @@ export class Cabinet extends Component
     showLeftWall(show)
     {
         if (this.leftWall != undefined)
-        {
-            if (show)
-            {    
-                this._attachPiece(this.leftWall)
-                this.leftWall.setVisibility(true)
-            }
-            else
-            {    
-                this._detachPiece(this.leftWall)
-                this.leftWall.setVisibility(false)
-            }
-        }
+            this.leftWall.setVisibility(show)
     }
 
     showRightWall(show)
     {
         if (this.rightWall != undefined)
+            this.rightWall.setVisibility(show)
+    }
+
+    swapLeftLegsWithCenter(swap)
+    {
+        if (swap)
         {
-            if (show)
-            {    
-                this._attachPiece(this.rightWall)
-                this.rightWall.setVisibility(true)
-            }
-            else
-            {    
-                this._detachPiece(this.rightWall)
-                this.rightWall.setVisibility(false)
+            this._detachPiece(this.flLeg)
+            this._detachPiece(this.blLeg)
+            this._attachPiece(this.fcLeg)
+            this._attachPiece(this.bcLeg)
+            if (this.fcLeg != undefined && this.bcLeg != undefined && this.flLeg != undefined && this.blLeg != undefined)
+            {
+                this.fcLeg.setPositionFromVector3(this.flLeg.getPosition())
+                this.fcLeg.setRotationFromEuler(this.flLeg.getRotation())
+                this.fcLeg.setVisibility(this.flLeg.getVisibility())
+                this.bcLeg.setPositionFromVector3(this.blLeg.getPosition())
+                this.bcLeg.setRotationFromEuler(this.blLeg.getRotation())
+                this.bcLeg.setVisibility(this.blLeg.getVisibility())
             }
         }
+        else
+        {
+            this._detachPiece(this.fcLeg)
+            this._detachPiece(this.bcLeg)
+            this._attachPiece(this.flLeg)
+            this._attachPiece(this.blLeg)
+        }
+    }
+
+    swapRightLegsWithCenter(swap)
+    {
+        if (swap)
+        {
+            this._detachPiece(this.frLeg)
+            this._detachPiece(this.brLeg)
+            this._attachPiece(this.fcLeg)
+            this._attachPiece(this.bcLeg)
+            if (this.fcLeg != undefined && this.bcLeg != undefined && this.frLeg != undefined && this.brLeg != undefined)
+            {
+                this.fcLeg.setPositionFromVector3(this.frLeg.getPosition())
+                this.fcLeg.setRotationFromEuler(this.frLeg.getRotation())
+                this.fcLeg.setVisibility(this.frLeg.getVisibility())
+                this.bcLeg.setPositionFromVector3(this.brLeg.getPosition())
+                this.bcLeg.setRotationFromEuler(this.brLeg.getRotation())
+                this.bcLeg.setVisibility(this.brLeg.getVisibility())
+            }
+        }
+        else
+        {
+            this._detachPiece(this.fcLeg)
+            this._detachPiece(this.bcLeg)
+            this._attachPiece(this.frLeg)
+            this._attachPiece(this.brLeg)
+        }
+    }
+
+    showLeftLegs(show)
+    {
+        if (this.flLeg != undefined)
+            this.flLeg.setVisibility(show)
+        if (this.blLeg != undefined)
+            this.blLeg.setVisibility(show)
+    }
+
+    showRightLegs(show)
+    {
+        if (this.frLeg != undefined)
+            this.frLeg.setVisibility(show)
+        if (this.brLeg != undefined)
+            this.brLeg.setVisibility(show)
     }
 
     _maintainShelves()
     {
         let shelfCount = Math.ceil((this.height - this.legHeight)/MAX_SHELF_OFFSET)
+        let delta = (this.height - this.legHeight)/(shelfCount + 1)
+        let offset = delta + this.legHeight
         if (this.shelves.length < shelfCount)
         {
-            let delta = (this.height - this.legHeight)/(shelfCount + 1)
-            let offset = delta + this.legHeight
             let extraShelves = shelfCount - this.shelves.length
             for (let i=0; i<extraShelves; i++)
             {
@@ -229,9 +294,14 @@ export class Cabinet extends Component
         }
         else if (this.shelves.length > shelfCount)
         {
-            for (let i=shelfCount; i<this.shelves.length; i++)
+            for (let i=shelfCount; i<this.shelves.length; i++)    
                 this._detachPiece(this.shelves[i])
             this.shelves.splice(shelfCount, this.shelves.length - shelfCount)
+            for (let shelf of this.shelves)
+            {    
+                shelf.setPosition(0, offset, 0)
+                offset += delta
+            }
         }
     }
 

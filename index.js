@@ -61,26 +61,25 @@ window.onload = () =>
         let input = new FRAMEWORK.InputManager('Input')
         sceneManager.register(input)
         cameraManager.registerInput(input)
-        let closet = new CONFIGURATOR.Closet(CONFIGURATOR.FAMILIES.FAMILY1, sceneManager)
+        let closet = new CONFIGURATOR.Closet(CONFIGURATOR.FAMILIES.FAMILY1, sceneManager, false)
         closet.addToScene()
+        closet.openAllTop(true)
+        closet.openAllBottom(true)
 
-        setTimeout(()=>{
+        /* setTimeout(()=>{
             closet.setWidth(2)
         }, 2000)
 
         setTimeout(()=>{
+            closet.setHeight(4)
+        }, 5000)
+
+        setTimeout(()=>{
+            closet.setHeight(2)
+        }, 8000)
+
+        setTimeout(()=>{
             closet.setWidth(0.4)
-        }, 5000)
-        /* setTimeout(()=>{
-            comp.setHeight(2)
-        }, 2000)
-
-        setTimeout(()=>{
-            comp.setHeight(4)
-        }, 5000)
-
-        setTimeout(()=>{
-            comp.setHeight(1)
-        }, 8000) */
+        }, 12000) */
     })
 }

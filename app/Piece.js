@@ -13,7 +13,19 @@ export class Piece
 
     setPosition(x, y, z) { this.object3D.position.set(x, y, z) }
 
-    getPosition() { return this.object3D.getPosition() }
+    setPositionFromVector3(position) { this.object3D.position.set(position.x, position.y, position.z) }
+
+    setRotation(x, y, z) { this.object3D.rotation.set(FRAMEWORK.Maths.toRadians(x), FRAMEWORK.Maths.toRadians(y), FRAMEWORK.Maths.toRadians(z)) }
+
+    setRotationFromEuler(rotation) { this.object3D.rotation.set(rotation.x, rotation.y, rotation.z) }
+
+    getPosition() { return this.object3D.position }
+
+    getRotation() { return this.object3D.rotation }
+
+    setVisibility(visible) { this.object3D.visible = visible }
+
+    getVisibility() { return this.object3D.visible }
 
     offset(x, y, z)
     {
@@ -23,8 +35,6 @@ export class Piece
         position.z += z
         this.setPosition(position.x, position.y, position.z)
     }
-
-    setRotation(x, y, z) { this.object3D.rotation.set(FRAMEWORK.Maths.toRadians(x), FRAMEWORK.Maths.toRadians(y), FRAMEWORK.Maths.toRadians(z)) }
 
     moveWidthBones(delta) 
     { 
@@ -65,8 +75,6 @@ export class Piece
             }
         }
     }
-
-    setVisibility(visible) { this.object3D.visible = visible }
 
     _collectBones()
     {

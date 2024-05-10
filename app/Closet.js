@@ -13,6 +13,8 @@ export class Closet
         this.hasInnerWalls = hasInnerWalls
         this.width = CONFIGURATOR.MIN_WIDTH
         this.setWidth(CONFIGURATOR.MIN_WIDTH)
+        this.areTopDoorsOpen = false
+        this.areBottomDoorsOpen = false
     }
 
     setPosition(x, y, z)
@@ -41,27 +43,16 @@ export class Closet
             {
                 let extraColumns = columnCount - this.columns.length
                 for (let i=0; i<extraColumns; i++)
-                    this.columns.push(new Column('Column'+this.columns.length, this.activeLayout))
+                {    
+                    let column = new Column('Column'+this.columns.length, this.activeLayout)
+                    column.openTop(this.areTopDoorsOpen)
+                    column.openBottom(this.areBottomDoorsOpen)
+                    this.columns.push(column)
+                }
             }
             for (let column of this.columns)
                 column.setWidth(columnWidth)
-
-            if (this.columns.length > 1)
-            {
-                this.columns[0].setRightEdge(this.hasInnerWalls)
-                for (let i=1; i<this.columns.length - 1; i++)
-                {
-                    this.columns[i].setLeftEdge(this.hasInnerWalls)
-                    this.columns[i].setRightEdge(this.hasInnerWalls)
-                }
-                this.columns[this.columns.length - 1].setLeftEdge(this.hasInnerWalls)
-            }
-            else
-            {
-                this.columns[0].setLeftEdge(true)
-                this.columns[0].setRightEdge(true)
-            }
-
+            this._assignColumnTypes()
             this.width = width
             this.addToScene()
         } 
@@ -93,6 +84,7 @@ export class Closet
                 let name = this.columns[i].name
                 this.columns.splice(i, 1, new Column(name, this.activeLayout))
             }
+            this._assignColumnTypes()
             this.addToScene()
         }
     }
@@ -110,6 +102,44 @@ export class Closet
             column.removeFromScene(this.sceneManager)
     }
 
+    openTopAt(index, open = false)
+    {
+        for (let i=0; i<this.columns.length; i++)
+        {
+            if (i == index)
+            {
+                this.columns[i].openTop(open)
+                break
+            }
+        }
+    }
+
+    openBottomAt(index, open = false)
+    {
+        for (let i=0; i<this.columns.length; i++)
+        {
+            if (i == index)
+            {
+                this.columns[i].openBottom(open)
+                break
+            }
+        }
+    }
+
+    openAllTop(open = false)
+    {
+        this.areTopDoorsOpen = open
+        for (let i=0; i<this.columns.length; i++)
+            this.columns[i].openTop(open)
+    }
+
+    openAllBottom(open = false)
+    {
+        this.areBottomDoorsOpen = open
+        for (let i=0; i<this.columns.length; i++)
+            this.columns[i].openBottom(open)
+    }
+    
     _prepareColumns()
     {
         let columnWidth = this.width/this.columns.length
@@ -120,6 +150,19 @@ export class Closet
             column.stack(columnPosition)
             columnPosition.x += columnWidth
         }
+    }
+
+    _assignColumnTypes()
+    {
+        if (this.columns.length > 1)
+        {
+            this.columns[0].setAsLeftColumn(this.hasInnerWalls)
+            for (let i=1; i<this.columns.length - 1; i++)
+                this.columns[i].setAsMiddleColumn(this.hasInnerWalls)
+            this.columns[this.columns.length - 1].setAsRightColumn()
+        }
+        else
+            this.columns[0].setAsSingleColumn()
     }
 
     _isLayoutSupported(inputLayout)

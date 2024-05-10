@@ -3,7 +3,7 @@ import { Cabinet } from './Component.js'
 
 export class Column
 {
-    constructor(name, layout, isLeftEdge = true, isRightEdge = true) 
+    constructor(name, layout)
     {
         this.name = name 
         this.bottomComponents = []
@@ -15,8 +15,6 @@ export class Column
         this.bottomHeight = this.layout.bottomHeight(this.height)
         this.topHeight = this.height - this.bottomHeight
         this.position = {x:0, y:0, z:0}
-        this.isLeftEdge = isLeftEdge
-        this.isRightEdge = isRightEdge
         this._prepareComponents(layout)
         this.setHeight(this.height)
     }
@@ -33,33 +31,93 @@ export class Column
         }
     }
 
-    setLeftEdge(isLeftEdge)
+    setAsSingleColumn()
     {
-        this.isLeftEdge = isLeftEdge
         for (let component of this.bottomComponents)
         {
             if (component instanceof Cabinet)   
-                component.showLeftWall(this.isLeftEdge)
+            {    
+                component.showLeftWall(true)
+                component.showLeftLegs(true)
+                component.showRightWall(true)
+                component.showRightLegs(true)
+                component.swapRightLegsWithCenter(false)
+            }
         }
         for (let component of this.topComponents)
         {
-            if (component instanceof Cabinet)   
-                component.showLeftWall(this.isLeftEdge)
+            if (component instanceof Cabinet)  
+            {
+                component.showLeftWall(true)
+                component.showRightWall(true)
+            }
         }
     }
 
-    setRightEdge(isRightEdge)
+    setAsLeftColumn(hasWall = true, hasRightLegs = true)
     {
-        this.isRightEdge = isRightEdge
         for (let component of this.bottomComponents)
         {
             if (component instanceof Cabinet)   
-                component.showRightWall(this.isRightEdge)
+            {    
+                component.showLeftWall(true)
+                component.showLeftLegs(true)
+                component.showRightWall(hasWall)
+                component.showRightLegs(hasRightLegs)
+                component.swapRightLegsWithCenter(true)
+            }
         }
         for (let component of this.topComponents)
         {
+            if (component instanceof Cabinet)  
+            {
+                component.showLeftWall(true)
+                component.showRightWall(hasWall)
+            }
+        }
+    }
+
+    setAsMiddleColumn(hasWall = true, hasLegs = true)
+    {
+        for (let component of this.bottomComponents)
+        {
             if (component instanceof Cabinet)   
-                component.showRightWall(this.isRightEdge)
+            {    
+                component.showLeftWall(false)
+                component.showLeftLegs(false)
+                component.showRightWall(hasWall)
+                component.showRightLegs(hasLegs)
+                component.swapRightLegsWithCenter(true)
+            }
+        }
+        for (let component of this.topComponents)
+        {
+            if (component instanceof Cabinet)  
+            {    
+                component.showLeftWall(false)
+                component.showRightWall(hasWall)
+            }
+        }
+    }
+
+    setAsRightColumn()
+    {
+        for (let component of this.bottomComponents)
+        {
+            if (component instanceof Cabinet)   
+            {    
+                component.showLeftWall(false)
+                component.showLeftLegs(false)
+                component.showRightWall(true)
+            }
+        }
+        for (let component of this.topComponents)
+        {
+            if (component instanceof Cabinet)  
+            {    
+                component.showLeftWall(false)
+                component.showRightWall(true)
+            }
         }
     }
 
@@ -129,25 +187,25 @@ export class Column
         }
     }
 
-    openTopDoors(open = false)
+    openTop(open = false)
     {
         for (let component of this.topComponents)
         {
             if (open)    
-                component.openDoor()
+                component.open()
             else
-                component.closeDoor()
+                component.close()
         } 
     }
 
-    openBottomDoors(open = false)
+    openBottom(open = false)
     {
         for (let component of this.bottomComponents)
         {
             if (open)    
-                component.openDoor()
+                component.open()
             else
-                component.closeDoor()
+                component.close()
         } 
     }
 
@@ -156,22 +214,21 @@ export class Column
         let doorLeft = true
         for (let i=0; i<layout.bottom.length; i++)
         {    
-
-            this.bottomComponents.push(this._getComponent(layout.bottom[i], i==0, i==(layout.bottom.length - 1), doorLeft))
+            this.bottomComponents.push(this._getComponent(layout.bottom[i], doorLeft))
             doorLeft = !doorLeft
         }
         doorLeft = true
         for (let i=0; i<layout.top.length; i++)
         {    
-            this.topComponents.push(this._getComponent(layout.top[i], i==0, i==(layout.top.length - 1), doorLeft))
+            this.topComponents.push(this._getComponent(layout.top[i], doorLeft))
             doorLeft = !doorLeft
         }
     }
 
-    _getComponent(json, isLeftEdge, isRightEdge, isLeftDoor)
+    _getComponent(json, isLeftDoor)
     {
         if (json.name.includes('CABINET'))
-            return new Cabinet(this.name, json, isLeftEdge, isRightEdge, isLeftDoor)
+            return new Cabinet(this.name, json, isLeftDoor)
     }
 
     _isHeightValid(height)
