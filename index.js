@@ -66,7 +66,7 @@ window.onload = () =>
         closet.openAllTop(true)
         closet.openAllBottom(true)
 
-        /* setTimeout(()=>{
+        setTimeout(()=>{
             closet.setWidth(2)
         }, 2000)
 
@@ -80,6 +80,6 @@ window.onload = () =>
 
         setTimeout(()=>{
             closet.setWidth(0.4)
-        }, 12000) */
+        }, 12000)
     })
 }

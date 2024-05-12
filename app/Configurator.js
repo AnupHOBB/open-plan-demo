@@ -42,7 +42,7 @@ export const COMPONENTS = {
             shelf : ['assets/layout10/Plank.glb'],
             handle : ['assets/layout10/Handle.glb'],
             sideleg : ['assets/layout10/Leg_Left_Front_01.glb'],// rotation angles FL : 0, FR : 90, BR : 180, BL : 270
-            centerLeg : ['assets/layout10/Handle.glb']
+            centerleg : ['assets/layout10/Handle.glb']
         }
     },
     TOP_CABINET : {
@@ -62,7 +62,7 @@ export const COMPONENTS = {
             shelf : ['assets/layout10/Plank.glb'],
             handle : ['assets/layout10/Handle.glb'],
             sideleg : [],// rotation angles FL : 0, FR : 90, BR : 180, BL : 270
-            centerLeg : []
+            centerleg : []
         }
     }
 }

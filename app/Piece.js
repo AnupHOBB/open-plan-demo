@@ -1,10 +1,13 @@
+import * as THREE from '../node_modules/three/src/Three.js'
 import * as FRAMEWORK from '../framework/Framework.js'
 
 export class Piece
 {
     constructor(object3D)
     {
-        this.object3D = object3D
+        this.object3D = new THREE.Group()
+        this.object3D.children.push(object3D)
+        object3D.parent = this.object3D
         this.bonesWidth = []
         this.bonesHeight = []
         this.bonesDepth = []
@@ -74,6 +77,20 @@ export class Piece
                 piece.object3D.parent = null
             }
         }
+    }
+
+    swap(newObject3D)
+    {
+        let oldObject3D = this.object3D.children[0]
+        if (oldObject3D != undefined)
+            oldObject3D.parent = null
+        if (newObject3D != undefined)
+        {    
+            newObject3D.parent = this.object3D
+            this.object3D.children.splice(0, 1, newObject3D)
+        }
+        else
+            this.object3D.children.splice(0, 1)
     }
 
     _collectBones()

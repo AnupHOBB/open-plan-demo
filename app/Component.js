@@ -7,6 +7,7 @@ class Component
 {
     constructor(columnName, json)
     {
+        this.json = json
         this.name = columnName+json.name
         this.width = json.width
         this.height = json.height
@@ -78,6 +79,17 @@ class Component
             return new Piece(SkeletonUtils.clone(asset))
         }
     }
+
+    _getAsset(key)
+    {
+        let asset = ASSET_MAP.get(key)
+        if (asset != undefined)
+        {
+            if (asset.isObject3D == undefined && asset.scene.isObject3D)
+                return SkeletonUtils.clone(asset.scene)
+            return SkeletonUtils.clone(asset)
+        } 
+    }
 }
 
 export class Cabinet extends Component
@@ -108,9 +120,6 @@ export class Cabinet extends Component
         this._attachPiece(this.brLeg)
         this.blLeg = this._getPiece(json.name + json.assets.sideleg[0])
         this._attachPiece(this.blLeg)
-
-        this.fcLeg = this._getPiece(json.name + json.assets.centerLeg[0])
-        this.bcLeg = this._getPiece(json.name + json.assets.centerLeg[0])
         this._reorientPieces(json)
     }
 
@@ -206,26 +215,13 @@ export class Cabinet extends Component
     {
         if (swap)
         {
-            this._detachPiece(this.flLeg)
-            this._detachPiece(this.blLeg)
-            this._attachPiece(this.fcLeg)
-            this._attachPiece(this.bcLeg)
-            if (this.fcLeg != undefined && this.bcLeg != undefined && this.flLeg != undefined && this.blLeg != undefined)
-            {
-                this.fcLeg.setPositionFromVector3(this.flLeg.getPosition())
-                this.fcLeg.setRotationFromEuler(this.flLeg.getRotation())
-                this.fcLeg.setVisibility(this.flLeg.getVisibility())
-                this.bcLeg.setPositionFromVector3(this.blLeg.getPosition())
-                this.bcLeg.setRotationFromEuler(this.blLeg.getRotation())
-                this.bcLeg.setVisibility(this.blLeg.getVisibility())
-            }
+            this.flLeg.swap(this._getAsset(this.json.name + this.json.assets.centerleg[0]))
+            this.blLeg.swap(this._getAsset(this.json.name + this.json.assets.centerleg[0]))
         }
         else
         {
-            this._detachPiece(this.fcLeg)
-            this._detachPiece(this.bcLeg)
-            this._attachPiece(this.flLeg)
-            this._attachPiece(this.blLeg)
+            this.flLeg.swap(this._getAsset(this.json.name + this.json.assets.sideleg[0]))
+            this.blLeg.swap(this._getAsset(this.json.name + this.json.assets.sideleg[0]))
         }
     }
 
@@ -233,26 +229,13 @@ export class Cabinet extends Component
     {
         if (swap)
         {
-            this._detachPiece(this.frLeg)
-            this._detachPiece(this.brLeg)
-            this._attachPiece(this.fcLeg)
-            this._attachPiece(this.bcLeg)
-            if (this.fcLeg != undefined && this.bcLeg != undefined && this.frLeg != undefined && this.brLeg != undefined)
-            {
-                this.fcLeg.setPositionFromVector3(this.frLeg.getPosition())
-                this.fcLeg.setRotationFromEuler(this.frLeg.getRotation())
-                this.fcLeg.setVisibility(this.frLeg.getVisibility())
-                this.bcLeg.setPositionFromVector3(this.brLeg.getPosition())
-                this.bcLeg.setRotationFromEuler(this.brLeg.getRotation())
-                this.bcLeg.setVisibility(this.brLeg.getVisibility())
-            }
+            this.frLeg.swap(this._getAsset(this.json.name + this.json.assets.centerleg[0]))
+            this.brLeg.swap(this._getAsset(this.json.name + this.json.assets.centerleg[0]))
         }
         else
         {
-            this._detachPiece(this.fcLeg)
-            this._detachPiece(this.bcLeg)
-            this._attachPiece(this.frLeg)
-            this._attachPiece(this.brLeg)
+            this.frLeg.swap(this._getAsset(this.json.name + this.json.assets.sideleg[0]))
+            this.brLeg.swap(this._getAsset(this.json.name + this.json.assets.sideleg[0]))
         }
     }
 
