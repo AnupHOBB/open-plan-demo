@@ -1,7 +1,7 @@
 import * as THREE from '../node_modules/three/src/Three.js'
 import * as FRAMEWORK from '../framework/Framework.js'
 
-export class Piece
+export class Socket
 {
     constructor(object3D)
     {
@@ -83,7 +83,10 @@ export class Piece
     {
         let oldObject3D = this.object3D.children[0]
         if (oldObject3D != undefined)
+        {    
             oldObject3D.parent = null
+            console.log(oldObject3D)
+        }
         if (newObject3D != undefined)
         {    
             newObject3D.parent = this.object3D

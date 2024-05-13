@@ -38,9 +38,7 @@ export class Column
             if (component instanceof Cabinet)   
             {    
                 component.showLeftWall(true)
-                component.showLeftLegs(true)
                 component.showRightWall(true)
-                component.showRightLegs(true)
                 component.swapRightLegsWithCenter(false)
             }
         }
@@ -54,16 +52,14 @@ export class Column
         }
     }
 
-    setAsLeftColumn(hasWall = true, hasRightLegs = true)
+    setAsLeftColumn(hasWall = true)
     {
         for (let component of this.bottomComponents)
         {
             if (component instanceof Cabinet)   
             {    
                 component.showLeftWall(true)
-                component.showLeftLegs(true)
                 component.showRightWall(hasWall)
-                component.showRightLegs(hasRightLegs)
                 component.swapRightLegsWithCenter(true)
             }
         }
@@ -77,7 +73,7 @@ export class Column
         }
     }
 
-    setAsMiddleColumn(hasWall = true, hasLegs = true)
+    setAsMiddleColumn(hasWall = true)
     {
         for (let component of this.bottomComponents)
         {
@@ -86,7 +82,6 @@ export class Column
                 component.showLeftWall(false)
                 component.showLeftLegs(false)
                 component.showRightWall(hasWall)
-                component.showRightLegs(hasLegs)
                 component.swapRightLegsWithCenter(true)
             }
         }
@@ -207,6 +202,24 @@ export class Column
             else
                 component.close()
         } 
+    }
+
+    switchTopDoorToLeft(useLeftDoor)
+    {
+        for (let component of this.topComponents)
+        {
+            if (component instanceof Cabinet)  
+                component.switchToLeftDoor(useLeftDoor)
+        }
+    }
+
+    switchBottomDoorToLeft(useLeftDoor)
+    {
+        for (let component of this.bottomComponents)
+        {
+            if (component instanceof Cabinet)  
+                component.switchToLeftDoor(useLeftDoor)
+        }
     }
 
     _prepareComponents(layout)

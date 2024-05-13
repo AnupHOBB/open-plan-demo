@@ -139,6 +139,30 @@ export class Closet
         for (let i=0; i<this.columns.length; i++)
             this.columns[i].openBottom(open)
     }
+
+    switchTopDoorToLeftAt(index, useLeftDoor = true)
+    {
+        for (let i=0; i<this.columns.length; i++)
+        {
+            if (i == index)
+            {
+                this.columns[i].switchTopDoorToLeft(useLeftDoor)
+                break
+            }
+        }
+    }
+
+    switchBottomDoorToLeftAt(index, useLeftDoor = true)
+    {
+        for (let i=0; i<this.columns.length; i++)
+        {
+            if (i == index)
+            {
+                this.columns[i].switchBottomDoorToLeft(useLeftDoor)
+                break
+            }
+        }
+    }
     
     _prepareColumns()
     {
@@ -157,12 +181,24 @@ export class Closet
         if (this.columns.length > 1)
         {
             this.columns[0].setAsLeftColumn(this.hasInnerWalls)
+            this.columns[0].switchTopDoorToLeft(false)
+            this.columns[0].switchBottomDoorToLeft(false)
             for (let i=1; i<this.columns.length - 1; i++)
+            {    
                 this.columns[i].setAsMiddleColumn(this.hasInnerWalls)
+                this.columns[i].switchTopDoorToLeft(i % 2 != 0)
+                this.columns[i].switchBottomDoorToLeft(i % 2 != 0)
+            }
             this.columns[this.columns.length - 1].setAsRightColumn()
+            this.columns[this.columns.length - 1].switchTopDoorToLeft(true)
+            this.columns[this.columns.length - 1].switchBottomDoorToLeft(true)
         }
         else
+        {    
             this.columns[0].setAsSingleColumn()
+            this.columns[0].switchTopDoorToLeft(true)
+            this.columns[0].switchBottomDoorToLeft(true)
+        }
     }
 
     _isLayoutSupported(inputLayout)
