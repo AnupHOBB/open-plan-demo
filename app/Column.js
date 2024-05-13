@@ -37,18 +37,14 @@ export class Column
         {
             if (component instanceof Cabinet)   
             {    
-                component.showLeftWall(true)
-                component.showRightWall(true)
+                component.swapRightSideWithGlass(false)
                 component.swapRightLegsWithCenter(false)
             }
         }
         for (let component of this.topComponents)
         {
             if (component instanceof Cabinet)  
-            {
-                component.showLeftWall(true)
-                component.showRightWall(true)
-            }
+                component.swapRightSideWithGlass(false)
         }
     }
 
@@ -58,8 +54,7 @@ export class Column
         {
             if (component instanceof Cabinet)   
             {    
-                component.showLeftWall(true)
-                component.showRightWall(hasWall)
+                component.swapRightSideWithGlass(!hasWall)
                 component.swapRightLegsWithCenter(true)
             }
         }
@@ -67,8 +62,8 @@ export class Column
         {
             if (component instanceof Cabinet)  
             {
-                component.showLeftWall(true)
-                component.showRightWall(hasWall)
+                component.showLeftSide(true)
+                component.swapRightSideWithGlass(!hasWall)
             }
         }
     }
@@ -79,9 +74,9 @@ export class Column
         {
             if (component instanceof Cabinet)   
             {    
-                component.showLeftWall(false)
+                component.showLeftSide(false)
                 component.showLeftLegs(false)
-                component.showRightWall(hasWall)
+                component.swapRightSideWithGlass(!hasWall)
                 component.swapRightLegsWithCenter(true)
             }
         }
@@ -89,8 +84,8 @@ export class Column
         {
             if (component instanceof Cabinet)  
             {    
-                component.showLeftWall(false)
-                component.showRightWall(hasWall)
+                component.showLeftSide(false)
+                component.swapRightSideWithGlass(!hasWall)
             }
         }
     }
@@ -101,18 +96,14 @@ export class Column
         {
             if (component instanceof Cabinet)   
             {    
-                component.showLeftWall(false)
+                component.showLeftSide(false)
                 component.showLeftLegs(false)
-                component.showRightWall(true)
             }
         }
         for (let component of this.topComponents)
         {
-            if (component instanceof Cabinet)  
-            {    
-                component.showLeftWall(false)
-                component.showRightWall(true)
-            }
+            if (component instanceof Cabinet)      
+                component.showLeftSide(false)
         }
     }
 

@@ -38,6 +38,7 @@ export const COMPONENTS = {
         assets : {
             body : ['assets/layout10/Bottom_Cabinet.glb'],
             wall : ['assets/layout10/Bottom_Cabinet_Panel.glb'],
+            glass : [],//['assets/layout10/Bottom_Door.glb'],
             door : ['assets/layout10/Bottom_Door.glb'],// rotation angles L : 180, R : 0
             shelf : ['assets/layout10/Plank.glb'],
             handle : ['assets/layout10/Handle.glb'],
@@ -58,6 +59,7 @@ export const COMPONENTS = {
         assets : {
             body : ['assets/layout10/Top_Cabinet.glb'],
             wall : ['assets/layout10/Top_Side_Glass.glb'],
+            glass : [],//['assets/layout10/Bottom_Door.glb'],
             door : ['assets/layout10/Top_Door.glb'],// rotation angles L : 180, R : 0
             shelf : ['assets/layout10/Plank.glb'],
             handle : ['assets/layout10/Handle.glb'],

@@ -85,12 +85,13 @@ export class Socket
         if (oldObject3D != undefined)
         {    
             oldObject3D.parent = null
-            console.log(oldObject3D)
+            this._clearBones()
         }
         if (newObject3D != undefined)
         {    
             newObject3D.parent = this.object3D
             this.object3D.children.splice(0, 1, newObject3D)
+            this._collectBones()
         }
         else
             this.object3D.children.splice(0, 1)
@@ -101,6 +102,13 @@ export class Socket
         this._traversePieceForBones(this.object3D, this.bonesWidth, 'Width')
         this._traversePieceForBones(this.object3D, this.bonesHeight, 'Height')
         this._traversePieceForBones(this.object3D, this.bonesDepth, 'Depth')
+    }
+
+    _clearBones()
+    {
+        this.bonesWidth.splice(0, this.bonesWidth.length)
+        this.bonesHeight.splice(0, this.bonesHeight.length)
+        this.bonesDepth.splice(0, this.bonesDepth.length)
     }
 
     _traversePieceForBones(object3D, boneArray, name)

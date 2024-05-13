@@ -45,9 +45,9 @@ class Component
 
     close() {}
 
-    showLeftWall(show) {}
+    showLeftSide(show) {}
 
-    showRightWall(show) {}
+    showRightSide(show) {}
 
     swapLeftLegsWithCenter(swap) {}
 
@@ -102,10 +102,10 @@ export class Cabinet extends Component
         this.selectedShelfPath = json.name + json.assets.shelf[0]
         this.body = this._getSocket(json.name + json.assets.body[0])
         this._attachSocket(this.body)
-        this.leftWall = this._getSocket(json.name + json.assets.wall[0])
-        this._attachSocket(this.leftWall)
-        this.rightWall = this._getSocket(json.name + json.assets.wall[0])
-        this._attachSocket(this.rightWall)
+        this.leftSide = this._getSocket(json.name + json.assets.wall[0])
+        this._attachSocket(this.leftSide)
+        this.rightSide = this._getSocket(json.name + json.assets.wall[0])
+        this._attachSocket(this.rightSide)
         this.handle = this._getSocket(json.name + json.assets.handle[0])
         this.door = this._getSocket(json.name + json.assets.door[0])
         if (this.door != undefined) 
@@ -141,8 +141,8 @@ export class Cabinet extends Component
             if (this.handle != undefined)
                 this.handle.offset(-delta, 0, 0)
         }
-        if (this.rightWall != undefined)
-            this.rightWall.offset(delta, 0, 0)
+        if (this.rightSide != undefined)
+            this.rightSide.offset(delta, 0, 0)
         for (let shelf of this.shelves)
             shelf.moveWidthBones(delta)
         if (this.frLeg != undefined)
@@ -162,10 +162,10 @@ export class Cabinet extends Component
             this.body.moveHeightBones(delta)
         if (this.door != undefined)
             this.door.moveHeightBones(delta)
-        if (this.leftWall != undefined)
-            this.leftWall.moveHeightBones(delta)
-        if (this.rightWall != undefined)
-            this.rightWall.moveHeightBones(delta)
+        if (this.leftSide != undefined)
+            this.leftSide.moveHeightBones(delta)
+        if (this.rightSide != undefined)
+            this.rightSide.moveHeightBones(delta)
         if (this.handle != undefined)
             this.handle.offset(0, delta, 0)
         this._maintainShelves()
@@ -178,10 +178,10 @@ export class Cabinet extends Component
         let delta = this.depth - prevDepth
         if (this.body != undefined)
             this.body.moveDepthBones(delta)
-        if (this.leftWall != undefined)
-            this.leftWall.moveDepthBones(delta)
-        if (this.rightWall != undefined)
-            this.rightWall.moveDepthBones(delta)
+        if (this.leftSide != undefined)
+            this.leftSide.moveDepthBones(delta)
+        if (this.rightSide != undefined)
+            this.rightSide.moveDepthBones(delta)
         for (let shelf of this.shelves)
             shelf.moveDepthBones(delta)
         if (this.blLeg != undefined)
@@ -205,16 +205,32 @@ export class Cabinet extends Component
             this.door.setRotation(0, this.useLeftDoor ? 180 : 0, 0)
     }
 
-    showLeftWall(show)
+    showLeftSide(show)
     {
-        if (this.leftWall != undefined)
-            this.leftWall.setVisibility(show)
+        if (this.leftSide != undefined)
+            this.leftSide.setVisibility(show)
     }
 
-    showRightWall(show)
+    showRightSide(show)
     {
-        if (this.rightWall != undefined)
-            this.rightWall.setVisibility(show)
+        if (this.rightSide != undefined)
+            this.rightSide.setVisibility(show)
+    }
+
+    swapLeftSideWithGlass(swap)
+    {
+        if (swap)
+            this.leftSide.swap(this._getAsset(this.json.name + this.json.assets.glass[0]))
+        else
+            this.leftSide.swap(this._getAsset(this.json.name + this.json.assets.wall[0]))
+    }
+
+    swapRightSideWithGlass(swap)
+    {
+        if (swap)
+            this.rightSide.swap(this._getAsset(this.json.name + this.json.assets.glass[0]))
+        else
+            this.rightSide.swap(this._getAsset(this.json.name + this.json.assets.wall[0]))
     }
 
     switchToLeftDoor(useLeftDoor)
@@ -322,10 +338,10 @@ export class Cabinet extends Component
         if (this.body != undefined)
             this.body.setPosition(0, this.legHeight, 0)
         this._reorientDoor()
-        if (this.leftWall != undefined)
-            this.leftWall.setPosition(-json.wallOffset.x, json.wallOffset.y, json.wallOffset.z)
-        if (this.rightWall != undefined)
-            this.rightWall.setPosition(json.wallOffset.x, json.wallOffset.y, json.wallOffset.z)
+        if (this.leftSide != undefined)
+            this.leftSide.setPosition(-json.wallOffset.x, json.wallOffset.y, json.wallOffset.z)
+        if (this.rightSide != undefined)
+            this.rightSide.setPosition(json.wallOffset.x, json.wallOffset.y, json.wallOffset.z)
     }
 
     _reorientDoor()
