@@ -61,7 +61,7 @@ window.onload = () =>
         let input = new FRAMEWORK.InputManager('Input')
         sceneManager.register(input)
         cameraManager.registerInput(input)
-        let closet = new CONFIGURATOR.Closet(CONFIGURATOR.FAMILIES.FAMILY1, sceneManager, false)
+        let closet = new CONFIGURATOR.Closet(CONFIGURATOR.FAMILIES.FAMILY1, sceneManager, true)
         closet.addToScene()
         closet.openAllTop(true)
         closet.openAllBottom(true)

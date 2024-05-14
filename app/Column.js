@@ -37,38 +37,35 @@ export class Column
         {
             if (component instanceof Cabinet)   
             {    
-                component.swapRightSideWithGlass(false)
+                component.switchToRightWall()
                 component.swapRightLegsWithCenter(false)
             }
         }
         for (let component of this.topComponents)
         {
             if (component instanceof Cabinet)  
-                component.swapRightSideWithGlass(false)
+                component.switchToRightWall()
         }
     }
 
-    setAsLeftColumn(hasWall = true)
+    setAsLeftColumn(isClosed = true)
     {
         for (let component of this.bottomComponents)
         {
             if (component instanceof Cabinet)   
             {    
-                component.swapRightSideWithGlass(!hasWall)
+                component.switchToRightSide(isClosed)
                 component.swapRightLegsWithCenter(true)
             }
         }
         for (let component of this.topComponents)
         {
             if (component instanceof Cabinet)  
-            {
-                component.showLeftSide(true)
-                component.swapRightSideWithGlass(!hasWall)
-            }
+                component.switchToRightSide(isClosed)
         }
     }
 
-    setAsMiddleColumn(hasWall = true)
+    setAsMiddleColumn(isClosed = true)
     {
         for (let component of this.bottomComponents)
         {
@@ -76,7 +73,7 @@ export class Column
             {    
                 component.showLeftSide(false)
                 component.showLeftLegs(false)
-                component.swapRightSideWithGlass(!hasWall)
+                component.switchToRightSide(isClosed)
                 component.swapRightLegsWithCenter(true)
             }
         }
@@ -85,7 +82,7 @@ export class Column
             if (component instanceof Cabinet)  
             {    
                 component.showLeftSide(false)
-                component.swapRightSideWithGlass(!hasWall)
+                component.switchToRightSide(isClosed)
             }
         }
     }

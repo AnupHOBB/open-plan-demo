@@ -99,6 +99,8 @@ export class Cabinet extends Component
         super(columnName, json)
         this.useLeftDoor = useLeftDoor
         this.widthDelta = 0
+        this.heightDelta = 0
+        this.depthDelta = 0
         this.selectedShelfPath = json.name + json.assets.shelf[0]
         this.body = this._getSocket(json.name + json.assets.body[0])
         this._attachSocket(this.body)
@@ -113,17 +115,16 @@ export class Cabinet extends Component
         this._attachSocket(this.door)
         this.shelves = []
         this._maintainShelves()
-        this.flLeg = this._getSocket(json.name + json.assets.sideleg[0])
+        this.flLeg = this._getSocket(json.name + json.assets.sideLeg[0])
         this._attachSocket(this.flLeg)
-        this.frLeg = this._getSocket(json.name + json.assets.sideleg[0])
+        this.frLeg = this._getSocket(json.name + json.assets.sideLeg[0])
         this._attachSocket(this.frLeg)
-        this.brLeg = this._getSocket(json.name + json.assets.sideleg[0])
+        this.brLeg = this._getSocket(json.name + json.assets.sideLeg[0])
         this._attachSocket(this.brLeg)
-        this.blLeg = this._getSocket(json.name + json.assets.sideleg[0])
+        this.blLeg = this._getSocket(json.name + json.assets.sideLeg[0])
         this._attachSocket(this.blLeg)
         this._reorientPieces(json)
         this.isDoorOpen = false
-
     }
 
     setWidth(width) 
@@ -169,6 +170,7 @@ export class Cabinet extends Component
         if (this.handle != undefined)
             this.handle.offset(0, delta, 0)
         this._maintainShelves()
+        this.heightDelta += delta
     }
 
     setDepth(depth) 
@@ -189,6 +191,7 @@ export class Cabinet extends Component
         if (this.brLeg != undefined)
             this.brLeg.offset(0, 0, delta)
         this.offset(0, 0, delta/2)
+        this.depthDelta += delta
     }
 
     open() 
@@ -217,21 +220,25 @@ export class Cabinet extends Component
             this.rightSide.setVisibility(show)
     }
 
-    swapLeftSideWithGlass(swap)
+    switchToLeftSide(isClosed)
     {
-        if (swap)
-            this.leftSide.swap(this._getAsset(this.json.name + this.json.assets.glass[0]))
+        if (isClosed)
+            this.leftSide.swap(this._getAsset(this.json.name + this.json.assets.closedSide[0]))
         else
-            this.leftSide.swap(this._getAsset(this.json.name + this.json.assets.wall[0]))
+            this.leftSide.swap(this._getAsset(this.json.name + this.json.assets.glassSide[0]))    
     }
 
-    swapRightSideWithGlass(swap)
+    switchToRightSide(isClosed)
     {
-        if (swap)
-            this.rightSide.swap(this._getAsset(this.json.name + this.json.assets.glass[0]))
+        if (isClosed)
+            this.rightSide.swap(this._getAsset(this.json.name + this.json.assets.closedSide[0]))
         else
-            this.rightSide.swap(this._getAsset(this.json.name + this.json.assets.wall[0]))
+            this.rightSide.swap(this._getAsset(this.json.name + this.json.assets.glassSide[0]))
     }
+
+    switchToLeftWall() { this.leftSide.swap(this._getAsset(this.json.name + this.json.assets.wall[0])) }
+
+    switchToRightWall() { this.rightSide.swap(this._getAsset(this.json.name + this.json.assets.wall[0])) }
 
     switchToLeftDoor(useLeftDoor)
     {
@@ -243,13 +250,13 @@ export class Cabinet extends Component
     {
         if (swap)
         {
-            this.flLeg.swap(this._getAsset(this.json.name + this.json.assets.centerleg[0]))
-            this.blLeg.swap(this._getAsset(this.json.name + this.json.assets.centerleg[0]))
+            this.flLeg.swap(this._getAsset(this.json.name + this.json.assets.centerLeg[0]))
+            this.blLeg.swap(this._getAsset(this.json.name + this.json.assets.centerLeg[0]))
         }
         else
         {
-            this.flLeg.swap(this._getAsset(this.json.name + this.json.assets.sideleg[0]))
-            this.blLeg.swap(this._getAsset(this.json.name + this.json.assets.sideleg[0]))
+            this.flLeg.swap(this._getAsset(this.json.name + this.json.assets.sideLeg[0]))
+            this.blLeg.swap(this._getAsset(this.json.name + this.json.assets.sideLeg[0]))
         }
     }
 
@@ -257,13 +264,13 @@ export class Cabinet extends Component
     {
         if (swap)
         {
-            this.frLeg.swap(this._getAsset(this.json.name + this.json.assets.centerleg[0]))
-            this.brLeg.swap(this._getAsset(this.json.name + this.json.assets.centerleg[0]))
+            this.frLeg.swap(this._getAsset(this.json.name + this.json.assets.centerLeg[0]))
+            this.brLeg.swap(this._getAsset(this.json.name + this.json.assets.centerLeg[0]))
         }
         else
         {
-            this.frLeg.swap(this._getAsset(this.json.name + this.json.assets.sideleg[0]))
-            this.brLeg.swap(this._getAsset(this.json.name + this.json.assets.sideleg[0]))
+            this.frLeg.swap(this._getAsset(this.json.name + this.json.assets.sideLeg[0]))
+            this.brLeg.swap(this._getAsset(this.json.name + this.json.assets.sideLeg[0]))
         }
     }
 
@@ -339,9 +346,9 @@ export class Cabinet extends Component
             this.body.setPosition(0, this.legHeight, 0)
         this._reorientDoor()
         if (this.leftSide != undefined)
-            this.leftSide.setPosition(-json.wallOffset.x, json.wallOffset.y, json.wallOffset.z)
+            this.leftSide.setPosition(-json.sideOffset.x, json.sideOffset.y, json.sideOffset.z)
         if (this.rightSide != undefined)
-            this.rightSide.setPosition(json.wallOffset.x, json.wallOffset.y, json.wallOffset.z)
+            this.rightSide.setPosition(json.sideOffset.x, json.sideOffset.y, json.sideOffset.z)
     }
 
     _reorientDoor()

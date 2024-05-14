@@ -3,14 +3,14 @@ import { Column } from "./Column.js"
 
 export class Closet
 {
-    constructor(family, sceneManager, hasSides = true) 
+    constructor(family, sceneManager, hasClosedSides = true) 
     { 
         this.columns = []
         this.position = { x: 0, y: 0, z: 0 }
         this.family = family
         this.activeLayout = family[0]
         this.sceneManager = sceneManager
-        this.hasSides = hasSides
+        this.hasClosedSides = hasClosedSides
         this.width = CONFIGURATOR.MIN_WIDTH
         this.setWidth(CONFIGURATOR.MIN_WIDTH)
         this.areTopDoorsOpen = false
@@ -163,6 +163,8 @@ export class Closet
             }
         }
     }
+
+    getColumnCount() { this.columns.length }
     
     _prepareColumns()
     {
@@ -180,12 +182,12 @@ export class Closet
     {
         if (this.columns.length > 1)
         {
-            this.columns[0].setAsLeftColumn(this.hasSides)
+            this.columns[0].setAsLeftColumn(this.hasClosedSides)
             this.columns[0].switchTopDoorToLeft(false)
             this.columns[0].switchBottomDoorToLeft(false)
             for (let i=1; i<this.columns.length - 1; i++)
             {    
-                this.columns[i].setAsMiddleColumn(this.hasSides)
+                this.columns[i].setAsMiddleColumn(this.hasClosedSides)
                 this.columns[i].switchTopDoorToLeft(i % 2 != 0)
                 this.columns[i].switchBottomDoorToLeft(i % 2 != 0)
             }
