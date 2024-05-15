@@ -71,11 +71,11 @@ window.onload = () =>
         }, 2000)
 
         setTimeout(()=>{
-            closet.setHeight(4)
+            closet.setHeight(2.5)
         }, 5000)
 
         setTimeout(()=>{
-            closet.setHeight(2)
+            closet.setHeight(1.9)
         }, 8000)
 
         setTimeout(()=>{

@@ -1,5 +1,5 @@
 import * as CONFIGURATOR from './Configurator.js'
-import { Cabinet } from './Component.js'
+import { Component } from './Component.js'
 
 export class Column
 {
@@ -34,74 +34,39 @@ export class Column
     setAsSingleColumn()
     {
         for (let component of this.bottomComponents)
-        {
-            if (component instanceof Cabinet)   
-            {    
-                component.switchToRightWall()
-                component.swapRightLegsWithCenter(false)
-            }
-        }
+            component.switchToRightWall()
         for (let component of this.topComponents)
-        {
-            if (component instanceof Cabinet)  
-                component.switchToRightWall()
-        }
+            component.switchToRightWall()
     }
 
     setAsLeftColumn(isClosed = true)
     {
         for (let component of this.bottomComponents)
-        {
-            if (component instanceof Cabinet)   
-            {    
-                component.switchToRightSide(isClosed)
-                component.swapRightLegsWithCenter(true)
-            }
-        }
+            component.switchToRightSide(isClosed)
         for (let component of this.topComponents)
-        {
-            if (component instanceof Cabinet)  
-                component.switchToRightSide(isClosed)
-        }
+            component.switchToRightSide(isClosed)
     }
 
     setAsMiddleColumn(isClosed = true)
     {
         for (let component of this.bottomComponents)
         {
-            if (component instanceof Cabinet)   
-            {    
-                component.showLeftSide(false)
-                component.showLeftLegs(false)
-                component.switchToRightSide(isClosed)
-                component.swapRightLegsWithCenter(true)
-            }
+            component.showLeftSide(false)
+            component.switchToRightSide(isClosed)
         }
         for (let component of this.topComponents)
         {
-            if (component instanceof Cabinet)  
-            {    
-                component.showLeftSide(false)
-                component.switchToRightSide(isClosed)
-            }
+            component.showLeftSide(false)
+            component.switchToRightSide(isClosed)
         }
     }
 
     setAsRightColumn()
     {
         for (let component of this.bottomComponents)
-        {
-            if (component instanceof Cabinet)   
-            {    
-                component.showLeftSide(false)
-                component.showLeftLegs(false)
-            }
-        }
+            component.showLeftSide(false)
         for (let component of this.topComponents)
-        {
-            if (component instanceof Cabinet)      
-                component.showLeftSide(false)
-        }
+            component.showLeftSide(false)
     }
 
     setHeight(height)
@@ -195,19 +160,13 @@ export class Column
     switchTopDoorToLeft(useLeftDoor)
     {
         for (let component of this.topComponents)
-        {
-            if (component instanceof Cabinet)  
-                component.switchToLeftDoor(useLeftDoor)
-        }
+            component.switchToLeftDoor(useLeftDoor)
     }
 
     switchBottomDoorToLeft(useLeftDoor)
     {
         for (let component of this.bottomComponents)
-        {
-            if (component instanceof Cabinet)  
-                component.switchToLeftDoor(useLeftDoor)
-        }
+            component.switchToLeftDoor(useLeftDoor)
     }
 
     _prepareComponents(layout)
@@ -229,7 +188,7 @@ export class Column
     _getComponent(json, isLeftDoor)
     {
         if (json.name.includes('CABINET'))
-            return new Cabinet(this.name, json, isLeftDoor)
+            return new Component(this.name, json, isLeftDoor)
     }
 
     _isHeightValid(height)

@@ -3,104 +3,20 @@ import { SkeletonUtils } from '../node_modules/three/examples/jsm/Addons.js';
 import { Socket } from "./Socket.js"
 import { ASSET_MAP, MAX_SHELF_OFFSET } from './Configurator.js'
 
-class Component
+export class Component
 {
-    constructor(columnName, json)
+    constructor(columnName, json, useLeftDoor)
     {
         this.json = json
         this.name = columnName+json.name
         this.width = json.width
         this.height = json.height
         this.depth = json.depth
-        this.legHeight = json.legHeight
-        this.component = new FRAMEWORK.SceneObject(this.name) 
-    }
-
-    setPosition(x, y, z) { this.component.setPosition(x, y, z) }
-
-    getPosition() { return this.component.getPosition() }
-
-    offset(x, y, z)
-    {
-        let position = this.getPosition()
-        position.x += x
-        position.y += y
-        position.z += z
-        this.setPosition(position.x, position.y, position.z)
-    }
-
-    registerInScene(sceneManager)
-    {
-        if (sceneManager != undefined)
-            sceneManager.register(this.component)
-    }
-
-    unregisterFromScene(sceneManager)
-    {
-        if (sceneManager != undefined)
-            sceneManager.unregister(this.name)
-    }
-
-    open() {}
-
-    close() {}
-
-    showLeftSide(show) {}
-
-    showRightSide(show) {}
-
-    swapLeftLegsWithCenter(swap) {}
-
-    swapRightLegsWithCenter(swap) {}
-
-    showLeftLegs(show) {}
-
-    showRightLegs(show) {}
-
-    _attachSocket(piece)
-    {
-        if (piece != undefined)
-            this.component.attachObject3D(piece.object3D)
-    }
-
-    _detachSocket(piece)
-    {
-        if (piece != undefined)
-            this.component.detachObject3D(piece.object3D)
-    }
-
-    _getSocket(key)
-    {
-        let asset = ASSET_MAP.get(key)
-        if (asset != undefined)
-        {
-            if (asset.isObject3D == undefined && asset.scene.isObject3D)
-                return new Socket(SkeletonUtils.clone(asset.scene))
-            return new Socket(SkeletonUtils.clone(asset))
-        }
-    }
-
-    _getAsset(key)
-    {
-        let asset = ASSET_MAP.get(key)
-        if (asset != undefined)
-        {
-            if (asset.isObject3D == undefined && asset.scene.isObject3D)
-                return SkeletonUtils.clone(asset.scene)
-            return SkeletonUtils.clone(asset)
-        } 
-    }
-}
-
-export class Cabinet extends Component
-{
-    constructor(columnName, json, useLeftDoor = false)
-    { 
-        super(columnName, json)
-        this.useLeftDoor = useLeftDoor
         this.widthDelta = 0
         this.heightDelta = 0
         this.depthDelta = 0
+        this.useLeftDoor = useLeftDoor
+        this.component = new FRAMEWORK.SceneObject(this.name) 
         this.selectedShelfPath = json.name + json.assets.shelf[0]
         this.body = this._getSocket(json.name + json.assets.body[0])
         this._attachSocket(this.body)
@@ -111,20 +27,28 @@ export class Cabinet extends Component
         this.handle = this._getSocket(json.name + json.assets.handle[0])
         this.door = this._getSocket(json.name + json.assets.door[0])
         if (this.door != undefined) 
+        {    
             this.door.attach(this.handle)
-        this._attachSocket(this.door)
+            this._attachSocket(this.door)
+        }
+        this._setupDrawers()
         this.shelves = []
         this._maintainShelves()
-        this.flLeg = this._getSocket(json.name + json.assets.sideLeg[0])
-        this._attachSocket(this.flLeg)
-        this.frLeg = this._getSocket(json.name + json.assets.sideLeg[0])
-        this._attachSocket(this.frLeg)
-        this.brLeg = this._getSocket(json.name + json.assets.sideLeg[0])
-        this._attachSocket(this.brLeg)
-        this.blLeg = this._getSocket(json.name + json.assets.sideLeg[0])
-        this._attachSocket(this.blLeg)
         this._reorientPieces(json)
         this.isDoorOpen = false
+    }
+
+    setPosition(x, y, z) { this.component.setPosition(x - (this.widthDelta/2), y, z - (this.depthDelta/2)) }
+
+    getPosition() { return this.component.getPosition() }
+
+    offset(x, y, z)
+    {
+        let position = this.getPosition()
+        position.x += x
+        position.y += y
+        position.z += z
+        this.setPosition(position.x, position.y, position.z)
     }
 
     setWidth(width) 
@@ -150,6 +74,12 @@ export class Cabinet extends Component
             this.frLeg.offset(delta, 0, 0)
         if (this.brLeg != undefined)
             this.brLeg.offset(delta, 0, 0)
+
+        for (let drawer of this.drawers)
+            drawer.moveWidthBones(delta)
+        for (let handle of this.drawerHandles)
+            handle.offset(delta/2, 0, 0)
+
         this.offset(-delta/2, 0, 0)
         this.widthDelta += delta
     }
@@ -169,6 +99,17 @@ export class Cabinet extends Component
             this.rightSide.moveHeightBones(delta)
         if (this.handle != undefined)
             this.handle.offset(0, delta, 0)
+
+        let drawerOffset = 0
+        for (let drawer of this.drawers)
+        {    
+            drawer.moveHeightBones(delta)
+            drawer.offset(0, drawerOffset, 0)
+            drawerOffset += delta
+        }
+        for (let handle of this.drawerHandles)
+            handle.offset(0, delta/2, 0)
+
         this._maintainShelves()
         this.heightDelta += delta
     }
@@ -246,68 +187,66 @@ export class Cabinet extends Component
         this._reorientDoor()
     }
 
-    swapLeftLegsWithCenter(swap)
+    registerInScene(sceneManager)
     {
-        if (swap)
-        {
-            this.flLeg.swap(this._getAsset(this.json.name + this.json.assets.centerLeg[0]))
-            this.blLeg.swap(this._getAsset(this.json.name + this.json.assets.centerLeg[0]))
-        }
-        else
-        {
-            this.flLeg.swap(this._getAsset(this.json.name + this.json.assets.sideLeg[0]))
-            this.blLeg.swap(this._getAsset(this.json.name + this.json.assets.sideLeg[0]))
-        }
+        if (sceneManager != undefined)
+            sceneManager.register(this.component)
     }
 
-    swapRightLegsWithCenter(swap)
+    unregisterFromScene(sceneManager)
     {
-        if (swap)
-        {
-            this.frLeg.swap(this._getAsset(this.json.name + this.json.assets.centerLeg[0]))
-            this.brLeg.swap(this._getAsset(this.json.name + this.json.assets.centerLeg[0]))
-        }
-        else
-        {
-            this.frLeg.swap(this._getAsset(this.json.name + this.json.assets.sideLeg[0]))
-            this.brLeg.swap(this._getAsset(this.json.name + this.json.assets.sideLeg[0]))
-        }
+        if (sceneManager != undefined)
+            sceneManager.unregister(this.name)
     }
 
-    showLeftLegs(show)
+    _setupDrawers()
     {
-        if (this.flLeg != undefined)
-            this.flLeg.setVisibility(show)
-        if (this.blLeg != undefined)
-            this.blLeg.setVisibility(show)
-    }
-
-    showRightLegs(show)
-    {
-        if (this.frLeg != undefined)
-            this.frLeg.setVisibility(show)
-        if (this.brLeg != undefined)
-            this.brLeg.setVisibility(show)
+        this.drawers = []
+        this.drawerHandles = []
+        let drawerValues = this.json.drawerValues
+        if (drawerValues != undefined)
+        {
+            for (let value of drawerValues)
+            {
+                let drawer = this._getSocket(this.json.name + this.json.assets.drawer[0])
+                if (drawer != undefined)
+                {
+                    drawer.setPosition(value.position.x , value.position.y, value.position.z)
+                    this._attachSocket(drawer)
+                    this.drawers.push(drawer)
+                    if (drawer != undefined) 
+                    {    
+                        let handle = this._getSocket(this.json.name + this.json.assets.handle[0])
+                        if (handle != undefined)
+                        {
+                            handle.setPosition(value.handlePosition.x, value.handlePosition.y, value.handlePosition.z)
+                            drawer.attach(handle)
+                            this.drawerHandles.push(handle)
+                        }
+                    }
+                }
+                else
+                    break
+            }
+        }
     }
 
     _maintainShelves()
     {
-        let shelfCount = Math.ceil((this.height - this.legHeight)/MAX_SHELF_OFFSET)
-        let delta = (this.height - this.legHeight)/(shelfCount + 1)
-        let offset = delta + this.legHeight
+        let shelfCount
+        if (this.json.shelfCount != undefined)
+            shelfCount = this.json.shelfCount
+        else
+            shelfCount = Math.ceil(this.height/MAX_SHELF_OFFSET)
         if (this.shelves.length < shelfCount)
         {
             let extraShelves = shelfCount - this.shelves.length
             for (let i=0; i<extraShelves; i++)
             {
                 let shelf = this._getSocket(this.selectedShelfPath)
+                shelf.moveWidthBones(this.widthDelta)
                 this._attachSocket(shelf)
                 this.shelves.push(shelf)
-            }
-            for (let shelf of this.shelves)
-            {    
-                shelf.setPosition(0, offset, 0)
-                offset += delta
             }
         }
         else if (this.shelves.length > shelfCount)
@@ -315,40 +254,29 @@ export class Cabinet extends Component
             for (let i=shelfCount; i<this.shelves.length; i++)    
                 this._detachSocket(this.shelves[i])
             this.shelves.splice(shelfCount, this.shelves.length - shelfCount)
-            for (let shelf of this.shelves)
-            {    
-                shelf.setPosition(0, offset, 0)
-                offset += delta
-            }
+        }
+        let delta = this.height/(shelfCount + 1)
+        let offset = delta
+        for (let shelf of this.shelves)
+        {    
+            shelf.setPosition(0, offset, 0)
+            offset += delta
         }
     }
 
     _reorientPieces(json)
     {
-        if (this.flLeg != undefined)
-            this.flLeg.setPosition(-json.standOffset.x, json.standOffset.y, json.standOffset.z)
-        if (this.frLeg != undefined)
-        {    
-            this.frLeg.setRotation(0, 90, 0) 
-            this.frLeg.setPosition(json.standOffset.x, json.standOffset.y, json.standOffset.z)
-        }
-        if (this.brLeg != undefined)
-        {    
-            this.brLeg.setRotation(0, 180, 0)
-            this.brLeg.setPosition(json.standOffset.x, json.standOffset.y, -json.standOffset.z)
-        }
-        if (this.blLeg != undefined)
-        {    
-            this.blLeg.setRotation(0, 270, 0)
-            this.blLeg.setPosition(-json.standOffset.x, json.standOffset.y, -json.standOffset.z)
-        }
-        if (this.body != undefined)
-            this.body.setPosition(0, this.legHeight, 0)
         this._reorientDoor()
         if (this.leftSide != undefined)
-            this.leftSide.setPosition(-json.sideOffset.x, json.sideOffset.y, json.sideOffset.z)
+        {    
+            let position = json.sideValues[0].position
+            this.leftSide.setPosition(position.x, position.y, position.z)
+        }
         if (this.rightSide != undefined)
-            this.rightSide.setPosition(json.sideOffset.x, json.sideOffset.y, json.sideOffset.z)
+        {    
+            let position = json.sideValues[1].position
+            this.rightSide.setPosition(position.x, position.y, position.z)
+        }
     }
 
     _reorientDoor()
@@ -356,12 +284,13 @@ export class Cabinet extends Component
         if (this.door != undefined)
         {
             this.door.setRotation(0, this.useLeftDoor ? 180 : 0, 0)
-            let xOffset = this.json.doorOffset.x + (this.useLeftDoor ? 0 : this.widthDelta)
-            this.door.setPosition(this.useLeftDoor ? -xOffset : xOffset, this.json.doorOffset.y, this.json.doorOffset.z)
+            let doorPosition = this.json.doorValue.position
+            let xOffset = doorPosition.x + (this.useLeftDoor ? 0 : this.widthDelta)
+            this.door.setPosition(this.useLeftDoor ? -xOffset : xOffset, doorPosition.y, doorPosition.z)
             if (this.handle != undefined)
             {
-                let handleOffset = this.json.handleOffset
-                this.handle.setPosition(handleOffset.x - this.widthDelta, this.height/2, handleOffset.z)
+                let handlePosition = this.json.doorValue.handlePosition
+                this.handle.setPosition(handlePosition.x - this.widthDelta, this.height/2, this.useLeftDoor ? -handlePosition.z : handlePosition.z)
                 this.handle.setRotation(0, this.useLeftDoor ? 180 : 0, 0)
             }
             if (this.isDoorOpen)
@@ -369,5 +298,39 @@ export class Cabinet extends Component
             else
                 this.close()
         }
+    }
+
+    _attachSocket(piece)
+    {
+        if (piece != undefined)
+            this.component.attachObject3D(piece.object3D)
+    }
+
+    _detachSocket(piece)
+    {
+        if (piece != undefined)
+            this.component.detachObject3D(piece.object3D)
+    }
+
+    _getSocket(key)
+    {
+        let asset = ASSET_MAP.get(key)
+        if (asset != undefined)
+        {
+            if (asset.isObject3D == undefined && asset.scene.isObject3D)
+                return new Socket(SkeletonUtils.clone(asset.scene))
+            return new Socket(SkeletonUtils.clone(asset))
+        }
+    }
+
+    _getAsset(key)
+    {
+        let asset = ASSET_MAP.get(key)
+        if (asset != undefined)
+        {
+            if (asset.isObject3D == undefined && asset.scene.isObject3D)
+                return SkeletonUtils.clone(asset.scene)
+            return SkeletonUtils.clone(asset)
+        } 
     }
 }
