@@ -1,3 +1,4 @@
+import { SkeletonUtils } from '../node_modules/three/examples/jsm/Addons.js';
 /////////////TO BE REMOVED/////////////
 export {Component} from './Component.js'
 export {Column} from './Column.js'
@@ -12,8 +13,9 @@ export {Closet} from './Closet.js'
  * Cabinet cannot have more than 5 columns
  */
 export const MIN_WIDTH = 0.4
-export const MAX_WIDTH = 3.5
+export const MAX_WIDTH = 9//3.5
 export const MAX_COLUMN_WIDTH = 0.76
+export const MIN_DEPTH = 0.4
 export const MAX_TWO_PART_COLUMN_HEIGHT = 2.5
 export const MIN_TWO_PART_COLUMN_HEIGHT = 1.9
 export const MAX_ONE_PART_COLUMN_HEIGHT = 2.1
@@ -79,7 +81,9 @@ export const FAMILIES = Object.freeze({
         layouts : [LAYOUTS.LAYOUT10, LAYOUTS.LAYOUT8],
         top : [], 
         sideLeg : ['f1SideLeg'],// rotation angles FL : 0, FR : 90, BR : 180, BL : 270
-        centerLeg : ['f1CenterLeg']//['assets/layout10/Handle.glb']
+        centerLeg : ['f1CenterLeg'],//['assets/layout10/Handle.glb']
+        legHeight : 0.1,
+        legOffset : { x: 0.0125, y: 0, z: 0.0125 }
     }
 })
 
@@ -99,4 +103,15 @@ export const ASSETS = {
     f1SideLeg : 'assets/f1/l10/Leg_Left_Front_01.glb', 
     f1CenterLeg : 'assets/f1/l10/Handle.glb',
     f1L10Drawer : 'assets/f1/l8/Drawer_01.glb' 
+}
+
+export function getAsset(key)
+{
+    let asset = ASSET_MAP.get(key)
+    if (asset != undefined)
+    {
+        if (asset.isObject3D == undefined && asset.scene.isObject3D)
+            return SkeletonUtils.clone(asset.scene)
+        return SkeletonUtils.clone(asset)
+    } 
 }

@@ -12,6 +12,7 @@ export class Column
         this.layout = layout
         this.width = CONFIGURATOR.MIN_WIDTH
         this.height = this._calculateHeight(layout)
+        this.depth = layout.top[0].depth
         this.bottomHeight = this.layout.bottomHeight(this.height)
         this.topHeight = this.height - this.bottomHeight
         this.position = {x:0, y:0, z:0}
@@ -50,6 +51,15 @@ export class Column
             this.height = this.bottomHeight + this.topHeight    
             this.stack(this.position)
         }
+    }
+
+    setDepth(depth)
+    {
+        this.depth = depth
+        for (let component of this.bottomComponents)
+            component.setDepth(depth)
+        for (let component of this.topComponents)
+            component.setDepth(depth)
     }
 
     setAsSingleColumn()
