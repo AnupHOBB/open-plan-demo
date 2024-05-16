@@ -1,4 +1,6 @@
+import * as FRAMEWORK from '../framework/Framework.js'
 import * as CONFIGURATOR from './Configurator.js'
+import { ASSET_MAP } from './Configurator.js'
 import { Column } from "./Column.js"
 
 export class Closet
@@ -6,9 +8,11 @@ export class Closet
     constructor(family, sceneManager, hasClosedSides = true) 
     { 
         this.columns = []
+        this.top = new FRAMEWORK.SceneObject('ClosetBase') 
+        this.base = new FRAMEWORK.SceneObject('ClosetBase') 
         this.position = { x: 0, y: 0, z: 0 }
         this.family = family
-        this.activeLayout = family[0]
+        this.activeLayout = family.layouts[0]
         this.sceneManager = sceneManager
         this.hasClosedSides = hasClosedSides
         this.width = CONFIGURATOR.MIN_WIDTH
@@ -165,6 +169,17 @@ export class Closet
     }
 
     getColumnCount() { this.columns.length }
+
+    _setupTop()
+    {
+
+    }
+
+    _setupBase()
+    {
+        //rotation angles FL : 0, FR : 90, BR : 180, BL : 270
+
+    }
     
     _prepareColumns()
     {
@@ -205,7 +220,7 @@ export class Closet
 
     _isLayoutSupported(inputLayout)
     {
-        for (let layout of this.family)
+        for (let layout of this.family.layouts)
         {
             if (inputLayout == layout)
                 return true

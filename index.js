@@ -3,7 +3,6 @@ import * as FRAMEWORK from './framework/Framework.js'
 import {GLTFLoader} from './node_modules/three/examples/jsm/loaders/GLTFLoader.js'
 import {DRACOLoader} from './node_modules/three/examples/jsm/loaders/DRACOLoader.js'
 import * as CONFIGURATOR from './app/Configurator.js'
-//import * as DATA from './app/data.js'
 
 const LAYOUT_INDEX = 6
 const TANGENT_ANGLE_OF_ELEVATION = 0.17333333333333334
@@ -12,23 +11,16 @@ window.onload = () =>
 {
     let loader = new FRAMEWORK.AssetLoader()
     loader.addLoader(CONFIGURATOR.CUBEMAP, CONFIGURATOR.ENVMAP_TEXTURES, new THREE.CubeTextureLoader())
-    for (let componentKey in CONFIGURATOR.COMPONENTS)
+
+    for (let assetKey in CONFIGURATOR.ASSETS)
     {
-        let componentJson = CONFIGURATOR.COMPONENTS[componentKey]
-        let assetJson = componentJson['assets']
-        for (let key in assetJson)
-        {
-            let array = assetJson[key]
-            for (let path of array)
-            {    
-                let dracoLoader = new DRACOLoader()
-                dracoLoader.setDecoderPath(FRAMEWORK.DRACO_DECODER_PATH)
-                let modelLoader = new GLTFLoader()
-                modelLoader.setDRACOLoader(dracoLoader)
-                loader.addLoader(componentJson.name+path, path, modelLoader)
-            }
-        }
+        let dracoLoader = new DRACOLoader()
+        dracoLoader.setDecoderPath(FRAMEWORK.DRACO_DECODER_PATH)
+        let modelLoader = new GLTFLoader()
+        modelLoader.setDRACOLoader(dracoLoader)
+        loader.addLoader(assetKey, CONFIGURATOR.ASSETS[assetKey], modelLoader)
     }
+
     loader.execute(CONFIGURATOR.ASSET_MAP, assets => {
         let canvas = document.querySelector('canvas')
         let sceneManager = new FRAMEWORK.SceneManager(canvas, true)

@@ -31,6 +31,27 @@ export class Column
         }
     }
 
+    setHeight(height)
+    {
+        if (this._isHeightValid(height))
+        {
+            let newBottomHeight = this.layout.bottomHeight(height)
+            let deltaBottomHeight = newBottomHeight - this.bottomHeight
+            let deltaBottomHeightPerComponent = deltaBottomHeight/this.bottomComponents.length
+            this.bottomHeight = newBottomHeight
+            for (let component of this.bottomComponents)
+                component.setHeight(component.height + deltaBottomHeightPerComponent)
+            let newTopHeight = height - newBottomHeight
+            let deltaTopHeight = newTopHeight - this.topHeight
+            let deltaTopHeightPerComponent = deltaTopHeight/this.topComponents.length
+            this.topHeight = newTopHeight
+            for (let component of this.topComponents)
+                component.setHeight(component.height + deltaTopHeightPerComponent)
+            this.height = this.bottomHeight + this.topHeight    
+            this.stack(this.position)
+        }
+    }
+
     setAsSingleColumn()
     {
         for (let component of this.bottomComponents)
@@ -67,27 +88,6 @@ export class Column
             component.showLeftSide(false)
         for (let component of this.topComponents)
             component.showLeftSide(false)
-    }
-
-    setHeight(height)
-    {
-        if (this._isHeightValid(height))
-        {
-            let newBottomHeight = this.layout.bottomHeight(height)
-            let deltaBottomHeight = newBottomHeight - this.bottomHeight
-            let deltaBottomHeightPerComponent = deltaBottomHeight/this.bottomComponents.length
-            this.bottomHeight = newBottomHeight
-            for (let component of this.bottomComponents)
-                component.setHeight(component.height + deltaBottomHeightPerComponent)
-            let newTopHeight = height - newBottomHeight
-            let deltaTopHeight = newTopHeight - this.topHeight
-            let deltaTopHeightPerComponent = deltaTopHeight/this.topComponents.length
-            this.topHeight = newTopHeight
-            for (let component of this.topComponents)
-                component.setHeight(component.height + deltaTopHeightPerComponent)
-            this.height = this.bottomHeight + this.topHeight    
-            this.stack(this.position)
-        }
     }
 
     changeLayout(layout) { this.layout = layout }
@@ -174,21 +174,15 @@ export class Column
         let doorLeft = true
         for (let i=0; i<layout.bottom.length; i++)
         {    
-            this.bottomComponents.push(this._getComponent(layout.bottom[i], doorLeft))
+            this.bottomComponents.push(new Component(this.name, layout.bottom[i], doorLeft))
             doorLeft = !doorLeft
         }
         doorLeft = true
         for (let i=0; i<layout.top.length; i++)
         {    
-            this.topComponents.push(this._getComponent(layout.top[i], doorLeft))
+            this.topComponents.push(new Component(this.name, layout.top[i], doorLeft))
             doorLeft = !doorLeft
         }
-    }
-
-    _getComponent(json, isLeftDoor)
-    {
-        if (json.name.includes('CABINET'))
-            return new Component(this.name, json, isLeftDoor)
     }
 
     _isHeightValid(height)

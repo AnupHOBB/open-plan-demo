@@ -17,15 +17,15 @@ export class Component
         this.depthDelta = 0
         this.useLeftDoor = useLeftDoor
         this.component = new FRAMEWORK.SceneObject(this.name) 
-        this.selectedShelfPath = json.name + json.assets.shelf[0]
-        this.body = this._getSocket(json.name + json.assets.body[0])
+        this.selectedShelfPath = json.assets.shelf[0]
+        this.body = this._getSocket(json.assets.body[0])
         this._attachSocket(this.body)
-        this.leftSide = this._getSocket(json.name + json.assets.wall[0])
+        this.leftSide = this._getSocket(json.assets.wall[0])
         this._attachSocket(this.leftSide)
-        this.rightSide = this._getSocket(json.name + json.assets.wall[0])
+        this.rightSide = this._getSocket(json.assets.wall[0])
         this._attachSocket(this.rightSide)
-        this.handle = this._getSocket(json.name + json.assets.handle[0])
-        this.door = this._getSocket(json.name + json.assets.door[0])
+        this.handle = this._getSocket(json.assets.handle[0])
+        this.door = this._getSocket(json.assets.door[0])
         if (this.door != undefined) 
         {    
             this.door.attach(this.handle)
@@ -164,22 +164,22 @@ export class Component
     switchToLeftSide(isClosed)
     {
         if (isClosed)
-            this.leftSide.swap(this._getAsset(this.json.name + this.json.assets.closedSide[0]))
+            this.leftSide.swap(this._getAsset(this.json.assets.closedSide[0]))
         else
-            this.leftSide.swap(this._getAsset(this.json.name + this.json.assets.glassSide[0]))    
+            this.leftSide.swap(this._getAsset(this.json.assets.glassSide[0]))    
     }
 
     switchToRightSide(isClosed)
     {
         if (isClosed)
-            this.rightSide.swap(this._getAsset(this.json.name + this.json.assets.closedSide[0]))
+            this.rightSide.swap(this._getAsset(this.json.assets.closedSide[0]))
         else
-            this.rightSide.swap(this._getAsset(this.json.name + this.json.assets.glassSide[0]))
+            this.rightSide.swap(this._getAsset(this.json.assets.glassSide[0]))
     }
 
-    switchToLeftWall() { this.leftSide.swap(this._getAsset(this.json.name + this.json.assets.wall[0])) }
+    switchToLeftWall() { this.leftSide.swap(this._getAsset(this.json.assets.wall[0])) }
 
-    switchToRightWall() { this.rightSide.swap(this._getAsset(this.json.name + this.json.assets.wall[0])) }
+    switchToRightWall() { this.rightSide.swap(this._getAsset(this.json.assets.wall[0])) }
 
     switchToLeftDoor(useLeftDoor)
     {
@@ -208,7 +208,7 @@ export class Component
         {
             for (let value of drawerValues)
             {
-                let drawer = this._getSocket(this.json.name + this.json.assets.drawer[0])
+                let drawer = this._getSocket(this.json.assets.drawer[0])
                 if (drawer != undefined)
                 {
                     drawer.setPosition(value.position.x , value.position.y, value.position.z)
@@ -216,7 +216,7 @@ export class Component
                     this.drawers.push(drawer)
                     if (drawer != undefined) 
                     {    
-                        let handle = this._getSocket(this.json.name + this.json.assets.handle[0])
+                        let handle = this._getSocket(this.json.assets.handle[0])
                         if (handle != undefined)
                         {
                             handle.setPosition(value.handlePosition.x, value.handlePosition.y, value.handlePosition.z)
