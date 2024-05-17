@@ -64,7 +64,7 @@ export class Closet
             this._assignColumnTypes()
             if (this.top != undefined)   
             {
-                this.top.setPosition((-columnWidth * (this.columns.length/2)) + (this.initialTopWidth/2), this.getHeight(), 0)  
+                this.top.setPosition((-columnWidth * (this.columns.length/2)) + (this.initialTopWidth/2) + this.family.topOffset.x, this.getHeight(), this.family.topOffset.z)  
                 this.top.moveWidthBones(width - this.width)
             }
             this.width = width
@@ -82,7 +82,7 @@ export class Closet
         for (let column of this.columns)
             column.setHeight(height)
         if (this.top != undefined)
-            this.top.setPosition((-this.columns[0].width * (this.columns.length/2)) + (this.initialTopWidth/2), this.getHeight(), 0)
+            this.top.setPosition((-this.columns[0].width * (this.columns.length/2)) + (this.initialTopWidth/2) + this.family.topOffset.x, this.getHeight(), this.family.topOffset.z)
     }
 
     setDepth(depth)

@@ -79,7 +79,8 @@ export const LAYOUTS = Object.freeze({
 export const FAMILIES = Object.freeze({
     FAMILY1: {
         layouts : [LAYOUTS.LAYOUT10, LAYOUTS.LAYOUT8],
-        top : ['f1Top'], 
+        top : ['f1Top'],
+        topOffset : { x: 0, y: 0, z: -0.02 },
         sideLeg : ['f1SideLeg'],// rotation angles FL : 0, FR : 90, BR : 180, BL : 270
         centerLeg : ['f1CenterLeg'],//['assets/layout10/Handle.glb']
         legHeight : 0.1,
