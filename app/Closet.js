@@ -21,6 +21,7 @@ export class Closet
         this.areBottomDoorsOpen = false
         this.sideLegs = []
         this.centerLegs = []
+        this.initialTopWidth = 0.4
         this._setupBase()
         this.setWidth(CONFIGURATOR.MIN_WIDTH)
     }
@@ -61,6 +62,11 @@ export class Closet
             for (let column of this.columns)
                 column.setWidth(columnWidth)
             this._assignColumnTypes()
+            if (this.top != undefined)   
+            {
+                this.top.setPosition((-columnWidth * (this.columns.length/2)) + (this.initialTopWidth/2), this.getHeight(), 0)  
+                this.top.moveWidthBones(width - this.width)
+            }
             this.width = width
             this._positionLegs(true)
             this.addToScene()
@@ -75,6 +81,8 @@ export class Closet
     {
         for (let column of this.columns)
             column.setHeight(height)
+        if (this.top != undefined)
+            this.top.setPosition((-this.columns[0].width * (this.columns.length/2)) + (this.initialTopWidth/2), this.getHeight(), 0)
     }
 
     setDepth(depth)
@@ -87,7 +95,7 @@ export class Closet
 
     getWidth() { return this.width }
 
-    getHeight() { return this.columns[0].height }
+    getHeight() { return this.columns[0].height + this.family.legHeight }
 
     getDepth() { return this.depth }
 
@@ -190,11 +198,13 @@ export class Closet
     _getTop(family)
     {
         if (family.top[0] != undefined)
-            new Socket(CONFIGURATOR.getAsset(family.top[0]))
+            return new Socket(CONFIGURATOR.getAsset(family.top[0]))
     }
 
     _setupBase()
     {
+        if (this.top != undefined)    
+            this.base.attachObject3D(this.top.object3D)
         //rotation angles FL : 0, FR : 90, BR : 180, BL : 270
         let flLeg = CONFIGURATOR.getAsset(this.family.sideLeg[0])
         this.base.attachObject3D(flLeg)
@@ -263,8 +273,6 @@ export class Closet
                 this.centerLegs[i+1].position.set(((scalar * this.width)/divisor) - offset.x, 0, -(this.depth/2 - offset.z))
                 scalar++
             }  
-            //for (let centerLeg of this.centerLegs)
-                //centerLeg.position.set(-(this.width/2 - offset.x), 0, -(this.depth/2 - offset.z))
         }    
     }
     

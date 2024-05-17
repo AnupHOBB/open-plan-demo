@@ -79,7 +79,7 @@ export const LAYOUTS = Object.freeze({
 export const FAMILIES = Object.freeze({
     FAMILY1: {
         layouts : [LAYOUTS.LAYOUT10, LAYOUTS.LAYOUT8],
-        top : [], 
+        top : ['f1Top'], 
         sideLeg : ['f1SideLeg'],// rotation angles FL : 0, FR : 90, BR : 180, BL : 270
         centerLeg : ['f1CenterLeg'],//['assets/layout10/Handle.glb']
         legHeight : 0.1,
@@ -100,9 +100,10 @@ export const ASSETS = {
     f1L10BottomCabinetWall: 'assets/f1/l10/Bottom_Cabinet_Panel.glb',
     f1L10DoorHandle : 'assets/f1/l10/Handle.glb', 
     f1L10Plank : 'assets/f1/l10/Plank.glb',
-    f1SideLeg : 'assets/f1/l10/Leg_Left_Front_01.glb', 
-    f1CenterLeg : 'assets/f1/l10/Handle.glb',
-    f1L10Drawer : 'assets/f1/l8/Drawer_01.glb' 
+    f1SideLeg : 'assets/f1/Leg_Left_Front_01.glb', 
+    f1CenterLeg : 'assets/f1/Leg_Center.glb',
+    f1L10Drawer : 'assets/f1/l8/Drawer_01.glb',
+    f1Top : 'assets/f1/Cornecing_01.glb' 
 }
 
 export function getAsset(key)
