@@ -1,7 +1,6 @@
 import * as FRAMEWORK from '../framework/Framework.js'
-import { SkeletonUtils } from '../node_modules/three/examples/jsm/Addons.js';
+import * as CONFIGURATOR from './Configurator.js'
 import { Socket } from "./Socket.js"
-import { ASSET_MAP, MAX_SHELF_OFFSET } from './Configurator.js'
 
 export class Component
 {
@@ -164,22 +163,22 @@ export class Component
     switchToLeftSide(isClosed)
     {
         if (isClosed)
-            this.leftSide.swap(this._getAsset(this.json.assets.closedSide[0]))
+            this.leftSide.swap(CONFIGURATOR.getAsset(this.json.assets.closedSide[0]))
         else
-            this.leftSide.swap(this._getAsset(this.json.assets.glassSide[0]))    
+            this.leftSide.swap(CONFIGURATOR.getAsset(this.json.assets.glassSide[0]))    
     }
 
     switchToRightSide(isClosed)
     {
         if (isClosed)
-            this.rightSide.swap(this._getAsset(this.json.assets.closedSide[0]))
+            this.rightSide.swap(CONFIGURATOR.getAsset(this.json.assets.closedSide[0]))
         else
-            this.rightSide.swap(this._getAsset(this.json.assets.glassSide[0]))
+            this.rightSide.swap(CONFIGURATOR.getAsset(this.json.assets.glassSide[0]))
     }
 
-    switchToLeftWall() { this.leftSide.swap(this._getAsset(this.json.assets.wall[0])) }
+    switchToLeftWall() { this.leftSide.swap(CONFIGURATOR.getAsset(this.json.assets.wall[0])) }
 
-    switchToRightWall() { this.rightSide.swap(this._getAsset(this.json.assets.wall[0])) }
+    switchToRightWall() { this.rightSide.swap(CONFIGURATOR.getAsset(this.json.assets.wall[0])) }
 
     switchToLeftDoor(useLeftDoor)
     {
@@ -237,7 +236,7 @@ export class Component
         if (this.json.shelfCount != undefined)
             shelfCount = this.json.shelfCount
         else
-            shelfCount = Math.ceil(this.height/MAX_SHELF_OFFSET)
+            shelfCount = Math.ceil(this.height/CONFIGURATOR.MAX_SHELF_OFFSET)
         if (this.shelves.length < shelfCount)
         {
             let extraShelves = shelfCount - this.shelves.length
@@ -314,23 +313,8 @@ export class Component
 
     _getSocket(key)
     {
-        let asset = ASSET_MAP.get(key)
+        let asset = CONFIGURATOR.getAsset(key)
         if (asset != undefined)
-        {
-            if (asset.isObject3D == undefined && asset.scene.isObject3D)
-                return new Socket(SkeletonUtils.clone(asset.scene))
-            return new Socket(SkeletonUtils.clone(asset))
-        }
-    }
-
-    _getAsset(key)
-    {
-        let asset = ASSET_MAP.get(key)
-        if (asset != undefined)
-        {
-            if (asset.isObject3D == undefined && asset.scene.isObject3D)
-                return SkeletonUtils.clone(asset.scene)
-            return SkeletonUtils.clone(asset)
-        } 
+            return new Socket(asset)
     }
 }
