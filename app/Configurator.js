@@ -20,7 +20,6 @@ export const MAX_TWO_PART_COLUMN_HEIGHT = 2.5
 export const MIN_TWO_PART_COLUMN_HEIGHT = 1.9
 export const MAX_ONE_PART_COLUMN_HEIGHT = 2.1
 export const MIN_ONE_PART_COLUMN_HEIGHT = 0.7
-export const DEPTH = 0.4
 export const MAX_SHELF_OFFSET = 0.5
 export const ASSET_MAP = new Map()
 export const CUBEMAP = 'cubemap'
